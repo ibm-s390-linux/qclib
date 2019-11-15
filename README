@@ -93,6 +93,11 @@ For enhancements, please describe the proposed change and its benefits.
 Release History:
 ================
 
+2.0.x
+    Changes:
+
+    Bug fixes:
+
 2.0.0
     Changes:
     - Add support for z/OS Container Extensions (zCX)
@@ -100,7 +105,7 @@ Release History:
          * qc_type_name
          * qc_type_family
          * qc_lic_identifier
-    - qc_test: Reworked output for subtle consistency improvements
+    - qc_test: Reworked output for subtle consistency improvements.
     - Replaced attribute qc_hardlimit_consumption with
       qc_limithard_consumption. Use CONFIG_V1_COMPATIBILITY for previous
       version.
