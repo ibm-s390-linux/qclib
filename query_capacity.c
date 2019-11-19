@@ -505,16 +505,14 @@ static int qc_post_process_ziip_thrds(struct qc_handle *hdl) {
 }
 
 static int qc_post_process_CEC(struct qc_handle *hdl) {
-	int cpuid, rc = 0, family = QC_TYPE_FAMILY_IBMZ;
+	int cpuid, rc = -1, family = QC_TYPE_FAMILY_IBMZ;
 	struct qc_mtype *type;
 	char *str;
-
+	
 	qc_debug(hdl, "Fill CEC layer\n");
 	qc_debug_indent_inc();
-	if ((str = qc_get_attr_value_string(hdl, qc_type)) == NULL) {
-		rc = -1;
+	if ((str = qc_get_attr_value_string(hdl, qc_type)) == NULL)
 		goto out;
-	}
 	cpuid = atoi(str);
 	for (type = mtypes; type->type; ++type) {
 		if (cpuid == type->type) {
@@ -527,10 +525,13 @@ static int qc_post_process_CEC(struct qc_handle *hdl) {
 				str = type->zname;
 			if (qc_set_attr_string(hdl, qc_type_name, str, ATTR_SRC_POSTPROC) ||
 			    qc_set_attr_int(hdl, qc_type_family, family, ATTR_SRC_POSTPROC))
-				rc = -1;
-			goto out;
+				goto out;
+			break;
 		}
 	}
+	if (qc_post_process_ziip_thrds(hdl))
+		goto out;
+	rc = 0;
 
 out:
 	qc_debug_indent_dec();

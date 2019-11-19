@@ -97,7 +97,7 @@ Release History:
     Changes:
 
     Bug fixes:
-
+    - Attribute qc_num_ziip_threads in CEC layer was not correctly set.
 2.0.0
     Changes:
     - Add support for z/OS Container Extensions (zCX)
