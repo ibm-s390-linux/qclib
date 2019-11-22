@@ -459,7 +459,9 @@ enum qc_attr_id {
 	qc_cp_absolute_capping = 8,
 	/** 1 if pool's CP virtual type has capped capacity<BR> 0 if not<br>See \c DEFINE \c CPUPOOL command in [3] */
 	qc_cp_capacity_cap = 9,
-	/** Guest current capped capacity for shared virtual CPs -- scaled value where 0x10000 equals to one core, or 0 if no capping set */
+	/** Guest current capped capacity for shared virtual CPs -- scaled value where 0x10000 equals to one core,
+	    or 0 if no capping set. While this field displays the capacity, either #qc_cp_capacity_cap or
+	    #qc_cp_limithard_cap must is set to indicate the kind of limit. */
 	qc_cp_capped_capacity = 10,
 	/** 1 if guest CP dispatch type has LIMITHARD capping,<BR> 0 if not<br>See \c SET \c SRM command in [3] */
 	qc_cp_dispatch_limithard = 11,
@@ -481,7 +483,9 @@ enum qc_attr_id {
 	qc_ifl_absolute_capping = 17,
 	/** 1 if pool's IFL virtual type has capped capacity<BR> 0 if not<br>See \c DEFINE \c CPUPOOL command in [3] */
 	qc_ifl_capacity_cap = 18,
-	/** Guest current capped capacity for shared virtual IFLs -- scaled value where 0x10000 equals to one core, or 0 if no capping set */
+	/** Guest current capped capacity for shared virtual IFLs -- scaled value where 0x10000 equals to one core,
+	    or 0 if no capping set. While this field displays the capacity, either #qc_ifl_capacity_cap or
+	    #qc_ifl_limithard_cap must is set to indicate the kind of limit. */
 	qc_ifl_capped_capacity = 19,
 	/** 1 if guest IFL dispatch type has LIMITHARD capping,<BR> 0 if not<br>See \c SET \c SRM command in [3] */
 	qc_ifl_dispatch_limithard = 20,
@@ -495,7 +499,9 @@ enum qc_attr_id {
 	qc_ziip_absolute_capping = 66,
 	/** 1 if pool's zIIP virtual type has capped capacity<BR> 0 if not<br>See \c DEFINE \c CPUPOOL command in [3] */
 	qc_ziip_capacity_cap = 67,
-	/** Guest current capped capacity for shared virtual zIIPs -- scaled value where 0x10000 equals to one core, or 0 if no capping set */
+	/** Guest current capped capacity for shared virtual zIIPs -- scaled value where 0x10000 equals to one core,
+	    or 0 if no capping set. While this field displays the capacity, either #qc_ziip_capacity_cap or
+	    #qc_ziip_limithard_cap must is set to indicate the kind of limit. */
 	qc_ziip_capped_capacity = 68,
 	/** 1 if guest zIIP dispatch type has LIMITHARD capping,<BR> 0 if not<br>See \c SET \c SRM command in [3] */
 	qc_ziip_dispatch_limithard = 69,

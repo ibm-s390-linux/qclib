@@ -315,6 +315,28 @@ static void qc_hdl_reinit(struct qc_handle *hdl) {
 	}
 }
 
+/** Verifies that either a and (b or c), or none are set. I.e. if only one of the attributes is set, then that's an error */
+static int qc_verify_capped_capacity(struct qc_handle *hdl, enum qc_attr_id a, enum qc_attr_id b, enum qc_attr_id c) {
+	int *val_a, *val_b, *val_c;
+
+	// We assume that non-presence of a value is due to...non-presence, as opposed to an error (since that would have been reported previously)
+	val_a = qc_get_attr_value_int(hdl, a);
+	val_b = qc_get_attr_value_int(hdl, b);
+	val_c = qc_get_attr_value_int(hdl, c);
+	if (!val_a && !val_b && !val_c)
+		return 0;
+
+	if ((*val_a && !*val_b && !*val_c) || (!*val_a && (*val_b || *val_c))) {
+		qc_debug(hdl, "Warning: Consistency check (\"capped capacity\") for '%s && (%s || %s)' failed at layer %d (%s/%s): %d && (%d || %d)\n",
+			qc_attr_id_to_char(hdl, a), qc_attr_id_to_char(hdl, b), qc_attr_id_to_char(hdl, c),
+			hdl->layer_no, qc_get_attr_value_string(hdl, qc_layer_type), qc_get_attr_value_string(hdl, qc_layer_category),
+			*val_a, *val_b, *val_c);
+		return 1;
+	}
+
+	return 0;
+}
+
 #define ATTR_UNDEF	qc_layer_name
 /** Verifies that a + (b (+ c)) <= d (b and c are optional, where b being unset (==ATTR_UNDEF) implies c being unset, too)
  *  for the respective int-attributes holds true.
@@ -404,6 +426,13 @@ static int qc_consistency_check(struct qc_handle *hdl) {
 			    (rc = qc_verify(hdl, qc_num_cp_dedicated,   qc_num_cp_shared,	ATTR_UNDEF, qc_num_cp_total,	  1)) ||
 			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,  qc_num_ifl_shared,	ATTR_UNDEF, qc_num_ifl_total,	  1)) ||
 			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,	qc_num_ziip_shared,	ATTR_UNDEF, qc_num_ziip_total,	  1)))
+				goto out;
+			break;
+		case QC_LAYER_TYPE_ZVM_CPU_POOL:
+		case QC_LAYER_TYPE_ZOS_TENANT_RESOURCE_GROUP:
+			if ((rc = qc_verify_capped_capacity(hdl, qc_cp_capped_capacity, qc_cp_capacity_cap, qc_cp_limithard_cap)) ||
+			    (rc = qc_verify_capped_capacity(hdl, qc_ifl_capped_capacity, qc_ifl_capacity_cap, qc_ifl_limithard_cap)) ||
+			    (rc = qc_verify_capped_capacity(hdl, qc_ziip_capped_capacity, qc_ziip_capacity_cap, qc_ziip_limithard_cap)))
 				goto out;
 			break;
 		case QC_LAYER_TYPE_ZVM_GUEST:
@@ -508,7 +537,7 @@ static int qc_post_process_CEC(struct qc_handle *hdl) {
 	int cpuid, rc = -1, family = QC_TYPE_FAMILY_IBMZ;
 	struct qc_mtype *type;
 	char *str;
-	
+
 	qc_debug(hdl, "Fill CEC layer\n");
 	qc_debug_indent_inc();
 	if ((str = qc_get_attr_value_string(hdl, qc_type)) == NULL)
