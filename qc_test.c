@@ -93,16 +93,16 @@ const char *attr2char(enum qc_attr_id id) {
 	case qc_num_core_dedicated: return "qc_num_core_dedicated";
 	case qc_num_core_shared: return "qc_num_core_shared";
 	case qc_ziip_absolute_capping: return "qc_ziip_absolute_capping";
-        case qc_ziip_capacity_cap: return "qc_ziip_capacity_cap";
-        case qc_ziip_capped_capacity: return "qc_ziip_capped_capacity";
-        case qc_ziip_dispatch_limithard: return "qc_ziip_dispatch_limithard";
-        case qc_ziip_dispatch_type: return "qc_ziip_dispatch_type";
-        case qc_ziip_limithard_cap: return "qc_ziip_limithard_cap";
-        case qc_ziip_weight_capping: return "qc_ziip_weight_capping";
-        case qc_num_ziip_dedicated: return "qc_num_ziip_dedicated";
+	case qc_ziip_capacity_cap: return "qc_ziip_capacity_cap";
+	case qc_ziip_capped_capacity: return "qc_ziip_capped_capacity";
+	case qc_ziip_dispatch_limithard: return "qc_ziip_dispatch_limithard";
+	case qc_ziip_dispatch_type: return "qc_ziip_dispatch_type";
+	case qc_ziip_limithard_cap: return "qc_ziip_limithard_cap";
+	case qc_ziip_weight_capping: return "qc_ziip_weight_capping";
+	case qc_num_ziip_dedicated: return "qc_num_ziip_dedicated";
 	case qc_num_ziip_shared: return "qc_num_ziip_shared";
 	case qc_num_ziip_total: return "qc_num_ziip_total";
-        case qc_num_ziip_threads: return "qc_num_ziip_threads";
+	case qc_num_ziip_threads: return "qc_num_ziip_threads";
 
 	default: break;
 	}
