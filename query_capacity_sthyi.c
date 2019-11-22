@@ -366,7 +366,7 @@ static int qc_parse_sthyi_guest(struct qc_handle *gst, struct inf0gst *guest) {
 	} else if (guest->infgval1 & infgziipv) {   // *ltype == QC_LAYER_TYPE_ZOS_ZCX_SERVER
 		if (qc_set_attr_int(gst, qc_cp_capped_capacity, htobe32(guest->infgziipcc), ATTR_SRC_STHYI))
 			goto err;
-		if ((guest->infgsziip > 0 /*|| guest->infgdziip > 0*/) &&
+		if ((guest->infgsziip > 0) &&
 		    qc_set_attr_int(gst, qc_ziip_dispatch_type, guest->infgziipdt, ATTR_SRC_STHYI))
 			goto err;
 		if (qc_set_attr_int(gst, qc_ziip_dispatch_limithard, (guest->infgflg1 & infgziiph) ? 1 : 0, ATTR_SRC_STHYI))
@@ -386,10 +386,29 @@ static int qc_parse_sthyi_guest(struct qc_handle *gst, struct inf0gst *guest) {
 	}
 
 	total = htobe16(guest->infgscps) + htobe16(guest->infgdcps) + htobe16(guest->infgsifl) + htobe16(guest->infgdifl);
-	if (guest->infgval1 & infgziipv)
-		total += htobe16(guest->infgsziip) /*+ htobe16(guest->infgdziip)*/;
-	if (qc_set_attr_int(gst, qc_num_cpu_total, total, ATTR_SRC_STHYI))
-		goto err;
+	if (!total && *ltype == QC_LAYER_TYPE_ZOS_ZCX_SERVER) {
+		int oldval = qc_consistency_check_requested;
+		/* WARNING: A zCX Server running on zIIPs exclusively will report those zIIPs in /proc/sysinfo, and
+			    qc_num_cpu_total will get set accordingly (and we won't know at that point, as /proc/sysinfo
+		    	    does not report the CPU type).
+			    However, in here we omit the zIIPs, so we would replace that value with a different one - in
+			    which case our consistency check will cry foul!
+			    Plus now we know that all values from /proc/sysinfo were for zIIPs - so we reset all values now. */
+		qc_debug(gst, "Detected zCX server running on zIIPs exclusively\n");
+		qc_consistency_check_requested = 0;
+		qc_debug(gst, "Consistency check disabled, adjusting all values from STSI to 0\n");
+		if (qc_set_attr_int(gst, qc_num_cpu_total, 0, ATTR_SRC_STHYI) ||
+		    qc_set_attr_int(gst, qc_num_cpu_configured, 0, ATTR_SRC_STHYI) ||
+		    qc_set_attr_int(gst, qc_num_cpu_standby, 0, ATTR_SRC_STHYI) ||
+		    qc_set_attr_int(gst, qc_num_cpu_reserved, 0, ATTR_SRC_STHYI) ||
+		    qc_set_attr_int(gst, qc_num_cpu_dedicated, 0, ATTR_SRC_STHYI) ||
+		    qc_set_attr_int(gst, qc_num_cpu_shared, 0, ATTR_SRC_STHYI))
+			goto err;
+		qc_consistency_check_requested = oldval;
+	} else {
+		if (qc_set_attr_int(gst, qc_num_cpu_total, total, ATTR_SRC_STHYI))
+			goto err;
+	}
 
 	/* if pool name is empty then we're done */
 	if (qc_is_nonempty_ebcdic((__u64*)guest->infgpnam)) {
