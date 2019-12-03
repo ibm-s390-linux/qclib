@@ -95,6 +95,7 @@ Release History:
 
 2.0.x
     Changes:
+    - Retry up to three times when a live guest migration is detected
 
     Bug fixes:
     - Attribute qc_num_ziip_threads in CEC layer was not correctly set.

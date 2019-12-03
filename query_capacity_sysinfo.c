@@ -124,12 +124,12 @@ static int qc_sysinfo_lgm_check(struct qc_handle *hdl, const char *sysinfo) {
 	qc_debug_indent_inc();
 	if (qc_sysinfo_open(hdl, &lsysinfo)) {
 		qc_debug(hdl, "Error: Failed to open /proc/sysinfo\n");
-		rc = 1;
+		rc = -1;
 		goto out;
 	}
 	if (strcmp(lsysinfo, sysinfo)) {
-		qc_debug(hdl, "/proc/sysinfo content changed, LGM took place\n");
-		rc = 2;
+		qc_debug(hdl, "/proc/sysinfo content changed, LGM took place!\n");
+		rc = 1;
 		goto out;
 	}
 	qc_debug(hdl, "/proc/sysinfo still consistent, no LGM detected\n");

@@ -466,6 +466,8 @@ static int qc_consistency_check(struct qc_handle *hdl) {
 	}
 
 out:
+	if (rc)
+		qc_debug(hdl, "Warning: Consistency check failed\n");
 	qc_debug_indent_dec();
 
 	return rc;
@@ -835,16 +837,17 @@ void *qc_open(int *rc) {
 	 * giving up. */
 	for (i = 0; i < 3; ++i) {
 		if (i > 0) {
-			qc_debug(hdl, "Warning: Consistency check failed, retry %d\n", i);
+			qc_debug(hdl, "Warning: Gathering data failed, retry %d\n", i);
 			qc_hdl_reinit(hdl);
 		}
 		hdl = _qc_open(hdl, rc);
-		if (*rc	|| ((*rc = qc_consistency_check(hdl)) <= 0))
+		if (*rc > 0)
+			continue;
+		if (*rc < 0 || ((*rc = qc_consistency_check(hdl)) <= 0))
 			break;
 	}
-	if (*rc > 0) {
-		qc_debug(hdl, "Warning: Unable to retrieve consistent data, giving up\n");
-	}
+	if (*rc > 0)
+		qc_debug(hdl, "Error: Unable to retrieve consistent data, giving up\n");
 	if (*rc == 0)
 		*rc = qc_register_hdl(hdl);
 
