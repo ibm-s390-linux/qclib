@@ -317,7 +317,7 @@ struct inf0gst
 #define infgpuccp  0x00		/* General Purpose (CP)              @VRLDWDN */
 #define infgpucifl 0x03		/* Integrated Fac for Linux (IFL).   @VRLDWDN */
 #define infgpuczip 0x05		/* zSeries Integrated Information             */
-#define infgpucspl 0xFF		/* May be dispatched on zIIP and CP           */
+#define infgpuczcp 0xFF		/* May be dispatched on zIIP and CP           */
 /* Values for field "infgpflg" */
 #define infgpclh   0x80		/* Resource Pool's CP virtual type            */
 #define infgpcpc   0x40		/* Resource Pool's CP virtual type            */
