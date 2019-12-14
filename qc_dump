@@ -32,7 +32,11 @@ fi
 
 echo "Adding further content...";
 cd /tmp
-dump="`ls -rtd qclib-??????.dump-1 | tail -1`";
+dump="`ls -rtd qclib-??????.dump-1 2>/dev/null | tail -1`";
+if [ "$dump" == "" ]; then
+	echo "Error: No dump data found, sorry";
+	exit 3;
+fi
 mv ref_result.txt $dump;
 lscpu -e			> $dump/lscpu.output;
 hostname			> $dump/hostname.output;

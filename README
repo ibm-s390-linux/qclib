@@ -101,6 +101,7 @@ Release History:
     - Attribute qc_num_ziip_threads in CEC layer was not correctly set.
     - Do not account zIIPs in layer QC_LAYER_TYPE_ZOS_ZCX_SERVER for
       qc_num_cpu_* attributes.
+    - qc_dump: Handle non-writable /tmp
 
 2.0.0
     Changes:
