@@ -111,7 +111,7 @@ static int qc_debug_file_init(void) {
 				goto out_err;
 			}
 		}
-		qc_debug(NULL, "This is qclib v2.0.0, level bb687ff1					, date 2019-11-10 10:16:30 +0100					\n");
+		qc_debug(NULL, "This is qclib v2.0.1, level 831726bb, date 2020-01-07 20:45:22 +0100\n");
 	}
 
 	return 0;
