@@ -93,6 +93,11 @@ For enhancements, please describe the proposed change and its benefits.
 Release History:
 ================
 
+2.0.x
+    Changes:
+
+    Bug fixes:
+
 2.0.1
     Changes:
     - Retry up to three times when a live guest migration is detected
