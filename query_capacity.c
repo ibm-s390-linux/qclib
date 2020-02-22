@@ -677,6 +677,24 @@ fail:
 	return -1;
 }
 
+static int qc_register_hdl(struct qc_handle *hdl) {
+	struct qc_reg_hdl *entry;
+
+	entry = malloc(sizeof(struct qc_reg_hdl));
+	if (!entry) {
+		qc_debug(hdl, "Error: Failed register hdl\n");
+		return -1;
+	}
+	entry->hdl = hdl;
+	if (qc_hdls)
+		entry->next = qc_hdls;
+	else
+		entry->next = NULL;
+	qc_hdls = entry;
+
+	return 0;
+}
+
 static void *_qc_open(struct qc_handle *hdl, int *rc) {
 	// sysinfo needs to be handled first, or our LGM check later on will have loopholes
 	// sysfs needs to be handled last, as part of the attributes apply to top-most layer only
@@ -748,28 +766,13 @@ out:
 	// Close all data sources
 	for (i = 0; (src = sources[i]) != NULL; i++)
 		src->close(hdl, src->priv);
+	if (hdl)
+		// nothing else we can do if registration fails
+		qc_register_hdl(hdl);
 	qc_debug(hdl, "Return rc=%d\n", *rc);
 	qc_debug_indent_dec();
 
 	return hdl;
-}
-
-static int qc_register_hdl(struct qc_handle *hdl) {
-	struct qc_reg_hdl *entry;
-
-	entry = malloc(sizeof(struct qc_reg_hdl));
-	if (!entry) {
-		qc_debug(hdl, "Error: Failed register hdl\n");
-		return -1;
-	}
-	entry->hdl = hdl;
-	if (qc_hdls)
-		entry->next = qc_hdls;
-	else
-		entry->next = NULL;
-	qc_hdls = entry;
-
-	return 0;
 }
 
 static int qc_verify_hdl(struct qc_handle *hdl, const char *func) {
@@ -849,8 +852,6 @@ void *qc_open(int *rc) {
 	}
 	if (*rc > 0)
 		qc_debug(hdl, "Error: Unable to retrieve consistent data, giving up\n");
-	if (*rc == 0)
-		*rc = qc_register_hdl(hdl);
 
 out:
 	qc_debug(hdl, "Return %p, rc=%d\n", *rc ? NULL : hdl, *rc);
