@@ -122,6 +122,8 @@ struct qc_lpar {
 	char layer_extended_name[QC_LEN_LAYER_EXTENDED_NAME];
 	char layer_uuid[QC_LEN_LAYER_UUID];
 	int adjustment;
+        int has_secure;
+        int secure;
 	int num_core_total;
 	int num_core_configured;
 	int num_core_standby;
@@ -201,6 +203,9 @@ struct qc_zvm_guest {
 	char layer_name[QC_LEN_LAYER_NAME];
 	char capping[QC_LEN_CAPPING];
 	int capping_num;
+        int mobility_enabled;
+        int has_secure;
+        int secure;
 	int num_cpu_total;
 	int num_cpu_configured;
 	int num_cpu_standby;
@@ -216,7 +221,6 @@ struct qc_zvm_guest {
 	int num_ziip_total;
 	int num_ziip_dedicated;
 	int num_ziip_shared;
-	int mobility_enabled;
 	int has_multiple_cpu_types;
 	int cp_dispatch_limithard;
 	int cp_dispatch_type;
@@ -273,6 +277,8 @@ struct qc_zos_zcx_server {
 	char layer_name[QC_LEN_LAYER_NAME];
 	char capping[QC_LEN_CAPPING];
 	int capping_num;
+        int has_secure;
+        int secure;
 	int num_cpu_total;
 	int num_cpu_configured;
 	int num_cpu_standby;
@@ -320,6 +326,8 @@ struct qc_kvm_guest {
 	char layer_name[QC_LEN_LAYER_NAME];
 	char layer_extended_name[QC_LEN_LAYER_EXTENDED_NAME];
 	char layer_uuid[QC_LEN_LAYER_UUID];
+        int has_secure;
+        int secure;
 	int num_cpu_total;
 	int num_cpu_configured;
 	int num_cpu_standby;
@@ -408,6 +416,8 @@ static struct qc_attr lpar_attrs[] = {
 	{qc_layer_extended_name, string, offsetof(struct qc_lpar, layer_extended_name)},
 	{qc_layer_uuid, string, offsetof(struct qc_lpar, layer_uuid)},
 	{qc_adjustment, integer, offsetof(struct qc_lpar, adjustment)},
+        {qc_has_secure, integer, offsetof(struct qc_lpar, has_secure)},
+        {qc_secure, integer, offsetof(struct qc_lpar, secure)},
 	{qc_num_core_total, integer, offsetof(struct qc_lpar, num_core_total)},
 	{qc_num_core_configured, integer, offsetof(struct qc_lpar, num_core_configured)},
 	{qc_num_core_standby, integer, offsetof(struct qc_lpar, num_core_standby)},
@@ -547,6 +557,9 @@ static struct qc_attr zvm_guest_attrs[] = {
 	{qc_layer_name, string, offsetof(struct qc_zvm_guest, layer_name)},
 	{qc_capping, string, offsetof(struct qc_zvm_guest, capping)},
 	{qc_capping_num, integer, offsetof(struct qc_zvm_guest, capping_num)},
+        {qc_mobility_enabled, integer, offsetof(struct qc_zvm_guest, mobility_enabled)},
+        {qc_has_secure, integer, offsetof(struct qc_zvm_guest, has_secure)},
+        {qc_secure, integer, offsetof(struct qc_zvm_guest, secure)},
 	{qc_num_cpu_total, integer, offsetof(struct qc_zvm_guest, num_cpu_total)},
 	{qc_num_cpu_configured, integer, offsetof(struct qc_zvm_guest, num_cpu_configured)},
 	{qc_num_cpu_standby, integer, offsetof(struct qc_zvm_guest, num_cpu_standby)},
@@ -562,7 +575,6 @@ static struct qc_attr zvm_guest_attrs[] = {
 	{qc_num_ziip_total, integer, offsetof(struct qc_zvm_guest, num_ziip_total)},
 	{qc_num_ziip_dedicated, integer, offsetof(struct qc_zvm_guest, num_ziip_dedicated)},
 	{qc_num_ziip_shared, integer, offsetof(struct qc_zvm_guest, num_ziip_shared)},
-	{qc_mobility_enabled, integer, offsetof(struct qc_zvm_guest, mobility_enabled)},
 	{qc_has_multiple_cpu_types, integer, offsetof(struct qc_zvm_guest, has_multiple_cpu_types)},
 	{qc_cp_dispatch_limithard, integer, offsetof(struct qc_zvm_guest, cp_dispatch_limithard)},
 	{qc_cp_capped_capacity, integer, offsetof(struct qc_zvm_guest, cp_capped_capacity)},
@@ -584,6 +596,8 @@ static struct qc_attr zos_zcx_server_attrs[] = {
 	{qc_layer_name, string, offsetof(struct qc_zos_zcx_server, layer_name)},
 	{qc_capping, string, offsetof(struct qc_zos_zcx_server, capping)},
 	{qc_capping_num, integer, offsetof(struct qc_zos_zcx_server, capping_num)},
+        {qc_has_secure, integer, offsetof(struct qc_zos_zcx_server, has_secure)},
+        {qc_secure, integer, offsetof(struct qc_zos_zcx_server, secure)},
 	{qc_num_cpu_total, integer, offsetof(struct qc_zos_zcx_server, num_cpu_total)},
 	{qc_num_cpu_configured, integer, offsetof(struct qc_zos_zcx_server, num_cpu_configured)},
 	{qc_num_cpu_standby, integer, offsetof(struct qc_zos_zcx_server, num_cpu_standby)},
@@ -614,6 +628,8 @@ static struct qc_attr kvm_guest_attrs[] = {
 	{qc_layer_name, string, offsetof(struct qc_kvm_guest, layer_name)},
 	{qc_layer_extended_name, string, offsetof(struct qc_kvm_guest, layer_extended_name)},
 	{qc_layer_uuid, string, offsetof(struct qc_kvm_guest, layer_uuid)},
+        {qc_has_secure, integer, offsetof(struct qc_kvm_guest, has_secure)},
+        {qc_secure, integer, offsetof(struct qc_kvm_guest, secure)},
 	{qc_num_cpu_total, integer, offsetof(struct qc_kvm_guest, num_cpu_total)},
 	{qc_num_cpu_configured, integer, offsetof(struct qc_kvm_guest, num_cpu_configured)},
 	{qc_num_cpu_standby, integer, offsetof(struct qc_kvm_guest, num_cpu_standby)},
@@ -681,6 +697,8 @@ const char *qc_attr_id_to_char(struct qc_handle *hdl, enum qc_attr_id id) {
 	case qc_capping: return "capping";
 	case qc_capping_num: return "capping_num";
 	case qc_mobility_enabled: return "mobility_enabled";
+        case qc_has_secure: return "has_secure";
+        case qc_secure: return "secure";
 	case qc_has_multiple_cpu_types: return "has_multiple_cpu_types";
 	case qc_cp_dispatch_limithard: return "cp_dispatch_limithard";
 	case qc_ifl_dispatch_limithard: return "ifl_dispatch_limithard";
@@ -1071,6 +1089,12 @@ int qc_is_attr_set_string(struct qc_handle *hdl, enum qc_attr_id id) {
 
 struct qc_handle *qc_get_root_handle(struct qc_handle *hdl) {
 	return hdl ? hdl->root : NULL;
+}
+
+struct qc_handle *qc_get_top_handle(struct qc_handle *hdl) {
+	for (; hdl->next != NULL; hdl = hdl->next);
+
+	return hdl;
 }
 
 struct qc_handle *qc_get_prev_handle(struct qc_handle *hdl) {

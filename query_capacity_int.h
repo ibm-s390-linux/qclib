@@ -21,7 +21,7 @@
 #define STR_BUF_SIZE		257
 
 #define ATTR_SRC_SYSINFO	'S'
-#define ATTR_SRC_OCF		'O'
+#define ATTR_SRC_SYSFS		'F'
 #define ATTR_SRC_HYPFS		'H'
 #define ATTR_SRC_STHYI		'V'
 #define ATTR_SRC_POSTPROC	'P'	// Note: Post-processed attributes can have multiple origins - would be
@@ -60,7 +60,7 @@ struct qc_data_src {
 	char *priv;
 };
 
-extern struct qc_data_src sysinfo, ocf, hypfs, sthyi;
+extern struct qc_data_src sysinfo, sysfs, hypfs, sthyi;
 
 /* Utility functions */
 int qc_ebcdic_to_ascii(struct qc_handle *hdl, char *inbuf, size_t insz);
@@ -74,6 +74,7 @@ struct qc_handle *qc_get_cec_handle(struct qc_handle *hdl);
 struct qc_handle *qc_get_lpar_handle(struct qc_handle *hdl);
 struct qc_handle *qc_get_root_handle(struct qc_handle *hdl);
 struct qc_handle *qc_get_prev_handle(struct qc_handle *hdl);
+struct qc_handle *qc_get_top_handle(struct qc_handle *hdl);
 
 /* Debugging-related functions and variables */
 extern long  qc_dbg_level;

@@ -27,9 +27,9 @@ by:
     Instruction'.
   * hypfs file system - for more information, refer to 'Device Drivers,
     Features, and Commands', chapter 'S/390 hypervisor file system'.
-  * Firmware interface /sys/firmware/ocf - for more information, refer to
-    'Device Drivers, Features, and Commands', chapter 'Identifying the z
-    Systems hardware'.
+  * Firmware and other interfaces as made available through sysfs. For more
+    information, refer to 'Device Drivers, Features, and Commands', chapter
+    'Identifying the z Systems hardware'.
 
 Please refer to:
    http://www.ibm.com/developerworks/linux/linux390/qclib.html
@@ -95,6 +95,9 @@ Release History:
 
 2.0.x
     Changes:
+    - New attributes in support of secure boot in all final layers:
+         * qc_has_secure
+         * qc_secure
 
     Bug fixes:
 

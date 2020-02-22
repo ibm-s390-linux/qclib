@@ -77,6 +77,8 @@ const char *attr2char(enum qc_attr_id id) {
 	case qc_capping: return "qc_capping";
 	case qc_capping_num: return "qc_capping_num";
 	case qc_mobility_enabled: return "qc_mobility_enabled";
+	case qc_has_secure: return "qc_has_secure";
+	case qc_secure: return "qc_secure";
 	case qc_has_multiple_cpu_types: return "qc_has_multiple_cpu_types";
 	case qc_cp_dispatch_limithard: return "qc_cp_dispatch_limithard";
 	case qc_ifl_dispatch_limithard: return "qc_ifl_dispatch_limithard";
@@ -476,7 +478,7 @@ void print_cec_information(void *hdl, int layer, int indent) {
 	print_string_attr(hdl, qc_layer_category, "n/a", layer, indent);
 	print_int_attr(hdl, qc_layer_type_num, "n/a", layer, indent);
 	print_int_attr(hdl, qc_layer_category_num, "n/a", layer, indent);
-	print_string_attr(hdl, qc_layer_name, "O V", layer, indent);
+	print_string_attr(hdl, qc_layer_name, "F V", layer, indent);
 	print_string_attr(hdl, qc_manufacturer, "S V", layer, indent);
 	print_string_attr(hdl, qc_type, "S V", layer, indent);
 	print_string_attr(hdl, qc_type_name, "S  ", layer, indent);
@@ -551,6 +553,8 @@ void print_lpar_information(void *hdl, int layer, int indent) {
 	print_string_attr(hdl, qc_partition_char, "S  ", layer, indent);
 	print_int_attr(hdl, qc_partition_char_num, "S  ", layer, indent);
 	print_int_attr(hdl, qc_adjustment, "S  ", layer, indent);
+	print_int_attr(hdl, qc_has_secure, "F  ", layer, indent);
+	print_int_attr(hdl, qc_secure, "F  ", layer, indent);
 
 	print_break();
 	print_int_attr(hdl, qc_num_core_total, "S  ", layer, indent);
@@ -717,6 +721,8 @@ void print_zoszcxserver_information(void *hdl, int layer, int indent) {
 	print_string_attr(hdl, qc_layer_name, "S V", layer, indent);
 	print_string_attr(hdl, qc_capping, " H ", layer, indent);
 	print_int_attr(hdl, qc_capping_num, " H ", layer, indent);
+	print_int_attr(hdl, qc_has_secure, "F  ", layer, indent);
+	print_int_attr(hdl, qc_secure, "F  ", layer, indent);
 
 	print_break();
 	print_int_attr(hdl, qc_num_cpu_total, "S V", layer, indent);
@@ -759,6 +765,9 @@ void print_zvmguest_information(void *hdl, int layer, int indent) {
 	print_string_attr(hdl, qc_layer_name, "S V", layer, indent);
 	print_string_attr(hdl, qc_capping, " H ", layer, indent);
 	print_int_attr(hdl, qc_capping_num, " H ", layer, indent);
+	print_int_attr(hdl, qc_mobility_enabled, "  V", layer, indent);
+	print_int_attr(hdl, qc_has_secure, "F  ", layer, indent);
+	print_int_attr(hdl, qc_secure, "F  ", layer, indent);
 
 	print_break();
 	print_int_attr(hdl, qc_num_cpu_total, "S V", layer, indent);
@@ -791,7 +800,6 @@ void print_zvmguest_information(void *hdl, int layer, int indent) {
 	print_int_attr(hdl, qc_ziip_capped_capacity, "  V", layer, indent);
 
 	print_break();
-	print_int_attr(hdl, qc_mobility_enabled, "  V", layer, indent);
 	print_int_attr(hdl, qc_has_multiple_cpu_types, "  V", layer, indent);
 
 	// check an attribute that only exists at a different layer
@@ -835,6 +843,8 @@ void print_kvmguest_information(void *hdl, int layer, int indent) {
 	print_string_attr(hdl, qc_layer_name, "S  ", layer, indent);
 	print_string_attr(hdl, qc_layer_extended_name, "S  ", layer, indent);
 	print_string_attr(hdl, qc_layer_uuid, "S  ", layer, indent);
+	print_int_attr(hdl, qc_has_secure, "F  ", layer, indent);
+	print_int_attr(hdl, qc_secure, "F  ", layer, indent);
 
 	print_break();
 	print_int_attr(hdl, qc_num_cpu_total, "S  ", layer, indent);

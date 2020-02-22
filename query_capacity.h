@@ -21,7 +21,7 @@
  * what layers. The letter encoding in the '\c Src' column describes how the
  * value is gained:
  *   - **S**: Provided by \c /proc/sysinfo, which is present in all Linux on z flavors.
- *   - **O**: Provided by \c /sys/firmware/ocf. Available in Linux kernel 3.0 or higher.
+ *   - **F**: Provided by firmware as made available through the \c sysfs filesystem.
  *   - **H**: Provided by hypfs, which is (preferably) available through \c debugfs at
  *            \c /sys/kernel/debug/s390_hypfs, or \c s390_hypfs (typically mounted at
  *            \c /sys/hypervisor/s390).
@@ -86,11 +86,11 @@
  * #qc_layer_category_num              | int  |     | Hardcoded to \c #QC_LAYER_CAT_HOST
  * #qc_layer_type                      |string|     | Hardcoded to \c "CEC"
  * #qc_layer_category                  |string|     | Hardcoded to \c "HOST"
- * #qc_layer_name                      |string|<CODE>O&nbsp;V</CODE>| CPC name of machine
+ * #qc_layer_name                      |string|<CODE>F&nbsp;V</CODE>| CPC name of machine. Available in Linux kernel 3.0 or higher.
  * #qc_manufacturer                    |string|<CODE>S&nbsp;V</CODE>| \n
  * #qc_type                            |string|<CODE>S&nbsp;V</CODE>| \n
  * #qc_type_name                       |string|<CODE>S&nbsp;&nbsp;</CODE>| \n
- * #qc_type_family                    | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
+ * #qc_type_family                     | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_model_capacity                  |string|<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_model                           |string|<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_sequence_code                   |string|<CODE>S&nbsp;V</CODE>| \n
@@ -143,6 +143,8 @@
  * #qc_partition_char                  |string|<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_partition_char_num              | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_adjustment                      | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
+ * #qc_has_secure                      | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
+ * #qc_secure                          | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
  * #qc_num_core_total                  | int  |<CODE>S</CODE>| Total number of CPs and IFLs configured in the LPARs activation profile
  * #qc_num_core_configured             | int  |<CODE>S&nbsp;&nbsp;</CODE>| <b>Note</b>: \b [5]
  * #qc_num_core_standby                | int  |<CODE>S&nbsp;&nbsp;</CODE>| Operational cores that require add'l configuration within the LPAR image to become usable<br><b>Note</b>: \b [5]
@@ -225,6 +227,9 @@
  * #qc_layer_name                      |string|<CODE>S&nbsp;V</CODE>| Userid of guest
  * #qc_capping                         |string|<CODE>&nbsp;H</CODE>| \n
  * #qc_capping_num                     | int  |<CODE>&nbsp;H</CODE>| \n
+ * #qc_mobility_enabled                | int  |<CODE>&nbsp;&nbsp;V</CODE>| \n
+ * #qc_has_secure                      | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
+ * #qc_secure                          | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
  * #qc_num_cpu_total                   | int  |<CODE>S&nbsp;V</CODE>| Sum of #qc_num_cpu_configured, #qc_num_cpu_standby and #qc_num_cpu_reserved, or #qc_num_cpu_dedicated and #qc_num_cpu_shared
  * #qc_num_cpu_configured              | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_num_cpu_standby                 | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
@@ -240,7 +245,6 @@
  * #qc_num_ziip_total                  | int  |<CODE>&nbsp;&nbsp;V</CODE>| Sum of #qc_num_ziip_dedicated and #qc_num_ziip_shared<br>Reported in unit of CPUs
  * #qc_num_ziip_dedicated              | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of CPUs
  * #qc_num_ziip_shared                 | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of CPUs
- * #qc_mobility_enabled                | int  |<CODE>&nbsp;&nbsp;V</CODE>| \n
  * #qc_has_multiple_cpu_types          | int  |<CODE>&nbsp;&nbsp;V</CODE>| \n
  * #qc_cp_dispatch_limithard           | int  |<CODE>&nbsp;&nbsp;V</CODE>| \n
  * #qc_cp_dispatch_type                | int  |<CODE>&nbsp;&nbsp;V</CODE>| Only set in presence of CPs
@@ -300,6 +304,8 @@
  * #qc_layer_name                      |string|<CODE>S&nbsp;V</CODE>| Userid of guest
  * #qc_capping                         |string|<CODE>&nbsp;H</CODE>| \n
  * #qc_capping_num                     | int  |<CODE>&nbsp;H</CODE>| \n
+ * #qc_has_secure                      | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
+ * #qc_secure                          | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
  * #qc_num_cpu_total                   | int  |<CODE>S&nbsp;V</CODE>| Sum of #qc_num_cpu_configured, #qc_num_cpu_standby and #qc_num_cpu_reserved, or #qc_num_cpu_dedicated and #qc_num_cpu_shared
  * #qc_num_cpu_configured              | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_num_cpu_standby                 | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
@@ -349,6 +355,8 @@
  * #qc_layer_name                      |string|<CODE>S&nbsp;&nbsp;</CODE>| Guest name truncated to 8 characters<br><b>Note</b>: \b [1]
  * #qc_layer_extended_name             |string|<CODE>S&nbsp;&nbsp;</CODE>| Guest name with up to 256 characters<br><b>Note</b>: Requires Linux kernel 3.19 or higher, [1]
  * #qc_layer_uuid                      |string|<CODE>S&nbsp;&nbsp;</CODE>| <b>Note</b>: Requires Linux kernel 3.19 or higher
+ * #qc_has_secure                      | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
+ * #qc_secure                          | int  |<CODE>F&nbsp;&nbsp;</CODE>| \n
  * #qc_num_cpu_total                   | int  |<CODE>S&nbsp;&nbsp;</CODE>| Sum of #qc_num_cpu_configured, #qc_num_cpu_standby and #qc_num_cpu_reserved, or #qc_num_cpu_dedicated and #qc_num_cpu_shared
  * #qc_num_cpu_configured              | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
  * #qc_num_cpu_standby                 | int  |<CODE>S&nbsp;&nbsp;</CODE>| \n
@@ -533,6 +541,14 @@ enum qc_attr_id {
 	/** Deprecated, see #qc_mobility_enabled */
 	qc_mobility_eligible = 32,
 #endif
+	/** Indicates whether secure boot is available to the entity.
+	    Requires Linux kernel 5.3 or later.
+	    Note: This attribute is only ever available for the topmost layer. */
+	qc_has_secure = 77,
+	/** Indicates whether entity was booted using the secure boot feature
+	    Requires Linux kernel 5.3 or later.
+	    Note: This attribute is only ever available for the topmost layer. */
+	qc_secure = 78,
 	/** Model identifier, see \c STSI instruction in [2] */
 	qc_model = 33,
 	/** Model capacity of machine, see \c STSI instruction in [2] */

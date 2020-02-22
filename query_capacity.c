@@ -679,7 +679,8 @@ fail:
 
 static void *_qc_open(struct qc_handle *hdl, int *rc) {
 	// sysinfo needs to be handled first, or our LGM check later on will have loopholes
-	struct qc_data_src *src, *sources[] = {&sysinfo, &ocf, &hypfs, &sthyi, NULL};
+	// sysfs needs to be handled last, as part of the attributes apply to top-most layer only
+	struct qc_data_src *src, *sources[] = {&sysinfo, &hypfs, &sthyi, &sysfs, NULL};
 	struct qc_handle *lparhdl;
 	int i;
 
@@ -907,7 +908,7 @@ static struct qc_handle *qc_get_layer_handle(void *config, int layer) {
 }
 
 static int qc_is_attr_id_valid(enum qc_attr_id id) {
-	return id <= qc_num_ziip_threads;
+	return id <= qc_secure;
 }
 
 int qc_get_attribute_string(void *cfg, enum qc_attr_id id, int layer, const char **value) {
