@@ -98,6 +98,8 @@ Release History:
     - New attributes in support of secure boot in all final layers:
          * qc_has_secure
          * qc_secure
+      Note: Changed src column indicator from 'o' to 'F' to summarize
+            firmware-related data
 
     Bug fixes:
     - qc_open: Memory leak on error

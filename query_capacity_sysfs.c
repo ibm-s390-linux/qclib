@@ -45,14 +45,13 @@ static int qc_sysfs_mkpath(struct qc_handle *hdl, const char *a, const char *b, 
     then there simply won't be any files in there */
 static int qc_sysfs_create_dump_dirs(struct qc_handle *hdl) {
 	char *path = NULL;
-	const char *i;
-	int rc = -1;
+	int rc = -1, i;
 
-	for (i = *sysfs_dirs; i; ++i) {
-		if (qc_sysfs_mkpath(hdl, qc_dbg_dump_dir, i, &path))
+	for (i = 0; sysfs_dirs[i]; ++i) {
+		if (qc_sysfs_mkpath(hdl, qc_dbg_dump_dir, sysfs_dirs[i], &path))
 			goto out;
 		if (mkdir(path, 0700) == -1) {
-			qc_debug(hdl, "Error: Could not create directory %s for firmware dump: %s\n", path, strerror(errno));
+			qc_debug(hdl, "Error: Could not create directory %s for sysfs dump: %s\n", path, strerror(errno));
 			goto out;
 		}
 	}
@@ -81,14 +80,18 @@ out:
 	return fp;
 }
 
-static int qc_sysfs_dump_file_char(struct qc_handle *hdl, const char* file, const char *data) {
+static int qc_sysfs_dump_file_char(struct qc_handle *hdl, const char* file, const char *val) {
 	FILE *fp;
 	int rc;
 
+	if (!val) {
+		qc_debug(hdl, "No data for '%s', skipping\n", file);
+		return 0;
+	}
 	fp = qc_sysfs_open_dump_file(hdl, file);
 	if (!fp)
 		return -1;
-	rc = fprintf(fp, "%s", data);
+	rc = fprintf(fp, "%s", val);
 	fclose(fp);
 	if (rc < 0) {
 		qc_debug(hdl, "Error: Failed to write dump to '%s'\n", file);
@@ -98,14 +101,18 @@ static int qc_sysfs_dump_file_char(struct qc_handle *hdl, const char* file, cons
 	return 0;
 }
 
-static int qc_sysfs_dump_file_int(struct qc_handle *hdl, const char* file, int data) {
+static int qc_sysfs_dump_file_int(struct qc_handle *hdl, const char* file, int val) {
 	FILE *fp;
 	int rc;
 
+	if (val < 0) {
+		qc_debug(hdl, "No data for '%s', skipping\n", file);
+		return 0;
+	}
 	fp = qc_sysfs_open_dump_file(hdl, file);
 	if (!fp)
 		return -1;
-	rc = fprintf(fp, "%d", data);
+	rc = fprintf(fp, "%d", val);
 	fclose(fp);
 	if (rc < 0) {
 		qc_debug(hdl, "Error: Failed to write dump to '%s'\n", file);
@@ -131,6 +138,7 @@ static void qc_sysfs_dump(struct qc_handle *hdl, char *data) {
 	    qc_sysfs_dump_file_int(hdl, FILE_SEC_IPL_HAS_SEC, p->has_secure) ||
 	    qc_sysfs_dump_file_int(hdl, FILE_SEC_IPL_SEC, p->secure))
 	    	goto out_err;
+	qc_debug(hdl, "sysfs data dumped to '%s%s'\n", qc_dbg_dump_dir, *sysfs_dirs);
 	goto out;
 
 out_err:
@@ -190,6 +198,7 @@ static int qc_sysfs_get_file_content(struct qc_handle *hdl, char *file, char **c
 		*content = NULL;
 		return 2;
 	}
+	qc_debug(hdl, "Read file %s\n", file);
 
 	return 0;
 }
