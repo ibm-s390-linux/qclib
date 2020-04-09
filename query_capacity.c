@@ -196,8 +196,6 @@ static int qc_debug_init(void) {
 		if (access(qc_dbg_use_dump, R_OK | X_OK) == -1) {
 			qc_debug(NULL, "Error: Dump usage requested, but path '%s' "
 					"not accessible: %s\n",	qc_dbg_use_dump, strerror(errno));
-			free(qc_dbg_use_dump);
-			qc_dbg_use_dump = NULL;
 			rc = 2;
 			goto out_err;
 		}
@@ -226,6 +224,8 @@ out_err:
 	// Nothing we can do about this except to disable debug messages to prevent further damage
 	free(qc_dbg_dump_dir);
 	qc_dbg_dump_dir = NULL;
+	free(qc_dbg_use_dump);
+	qc_dbg_use_dump = NULL;
 	free(path);
 
 	return rc;
@@ -297,6 +297,56 @@ out:
 	return rc;
 }
 
+static int qc_hdl_register(struct qc_handle *hdl) {
+	struct qc_reg_hdl *entry;
+
+	entry = malloc(sizeof(struct qc_reg_hdl));
+	if (!entry) {
+		qc_debug(hdl, "Error: Failed register hdl\n");
+		return -1;
+	}
+	entry->hdl = hdl;
+	if (qc_hdls)
+		entry->next = qc_hdls;
+	else
+		entry->next = NULL;
+	qc_hdls = entry;
+
+	return 0;
+}
+
+static void qc_hdl_unregister(struct qc_handle *hdl) {
+	struct qc_reg_hdl *entry, *prev = NULL;
+
+	for (entry = qc_hdls; entry != NULL; prev = entry, entry = entry->next) {
+		if (entry->hdl == hdl) {
+			if (prev && entry->next)
+				prev->next = entry->next;
+			else if (!prev)
+				qc_hdls = entry->next;
+			else
+				prev->next = NULL;
+			free(entry);
+			break;
+		}
+	}
+	return;
+}
+
+static int qc_hdl_verify(struct qc_handle *hdl, const char *func) {
+	struct qc_reg_hdl *entry;
+
+	if (!hdl)
+		return -1;
+	for (entry = qc_hdls; entry != NULL; entry = entry->next) {
+		if (entry->hdl == hdl)
+			return 0;
+	}
+	qc_debug(NULL, "Error: %s() called with unknown handle %p\n", func, hdl);
+
+	return -1;
+}
+
 // De-alloc hdl, leaving out the actual handle
 static void qc_hdl_reinit(struct qc_handle *hdl) {
 	struct qc_handle *ptr = hdl, *arg = hdl;
@@ -313,6 +363,7 @@ static void qc_hdl_reinit(struct qc_handle *hdl) {
 			free(ptr);
 		ptr = hdl;
 	}
+	qc_hdl_unregister(arg);
 }
 
 /** Verifies that either a and (b or c), or none are set. I.e. if only one of the attributes is set, then that's an error */
@@ -679,24 +730,6 @@ fail:
 	return -1;
 }
 
-static int qc_register_hdl(struct qc_handle *hdl) {
-	struct qc_reg_hdl *entry;
-
-	entry = malloc(sizeof(struct qc_reg_hdl));
-	if (!entry) {
-		qc_debug(hdl, "Error: Failed register hdl\n");
-		return -1;
-	}
-	entry->hdl = hdl;
-	if (qc_hdls)
-		entry->next = qc_hdls;
-	else
-		entry->next = NULL;
-	qc_hdls = entry;
-
-	return 0;
-}
-
 static void *_qc_open(struct qc_handle *hdl, int *rc) {
 	// sysinfo needs to be handled first, or our LGM check later on will have loopholes
 	// sysfs needs to be handled last, as part of the attributes apply to top-most layer only
@@ -770,43 +803,11 @@ out:
 		src->close(hdl, src->priv);
 	if (hdl)
 		// nothing else we can do if registration fails
-		qc_register_hdl(hdl);
+		qc_hdl_register(hdl);
 	qc_debug(hdl, "Return rc=%d\n", *rc);
 	qc_debug_indent_dec();
 
 	return hdl;
-}
-
-static int qc_verify_hdl(struct qc_handle *hdl, const char *func) {
-	struct qc_reg_hdl *entry;
-
-	if (!hdl)
-		return -1;
-	for (entry = qc_hdls; entry != NULL; entry = entry->next) {
-		if (entry->hdl == hdl)
-			return 0;
-	}
-	qc_debug(NULL, "Error: %s() called with unknown handle %p\n", func, hdl);
-
-	return -1;
-}
-
-static void qc_unregister_hdl(struct qc_handle *hdl) {
-	struct qc_reg_hdl *entry, *prev = NULL;
-
-	for (entry = qc_hdls; entry != NULL; prev = entry, entry = entry->next) {
-		if (entry->hdl == hdl) {
-			if (prev && entry->next)
-				prev->next = entry->next;
-			else if (!prev)
-				qc_hdls = entry->next;
-			else
-				prev->next = NULL;
-			free(entry);
-			break;
-		}
-	}
-	return;
 }
 
 void *qc_open(int *rc) {
@@ -867,14 +868,13 @@ out:
 }
 
 void qc_close(void *hdl) {
-	if (qc_verify_hdl(hdl, "qc_close"))
+	if (qc_hdl_verify(hdl, "qc_close"))
 		return;
 	qc_debug(hdl, "qc_close()\n");
 	qc_debug_indent_inc();
 
 	qc_debug_deinit(hdl);
 	qc_hdl_reinit(hdl);
-	qc_unregister_hdl(hdl);
 	free(hdl);
 
 	qc_debug_indent_dec();
@@ -883,7 +883,7 @@ void qc_close(void *hdl) {
 int qc_get_num_layers(void *cfg, int *rc) {
 	struct qc_handle *hdl = cfg;
 
-	if (qc_verify_hdl(hdl, "qc_get_num_layers")) {
+	if (qc_hdl_verify(hdl, "qc_get_num_layers")) {
 		*rc = -EFAULT;
 		return *rc;
 	}
@@ -919,7 +919,7 @@ int qc_get_attribute_string(void *cfg, enum qc_attr_id id, int layer, const char
 	int rc;
 
 	*value = NULL;
-	if (qc_verify_hdl(cfg, "qc_get_attribute_string"))
+	if (qc_hdl_verify(cfg, "qc_get_attribute_string"))
 		return -4;
 	hdl = qc_get_layer_handle(cfg, layer);
 	qc_debug(cfg, "qc_get_attribute_string(attr=%d, layer=%d)\n", id, layer);
@@ -956,7 +956,7 @@ int qc_get_attribute_int(void *cfg, enum qc_attr_id id, int layer, int *value) {
 	int rc;
 
 	*value = -EINVAL;
-	if (qc_verify_hdl(cfg, "qc_get_attribute_int"))
+	if (qc_hdl_verify(cfg, "qc_get_attribute_int"))
 		return -4;
 	hdl = qc_get_layer_handle(cfg, layer);
 	qc_debug(cfg, "qc_get_attribute_int(attr=%d, layer=%d)\n", id, layer);
@@ -998,7 +998,7 @@ int qc_get_attribute_float(void *cfg, enum qc_attr_id id, int layer, float *valu
 	int rc;
 
 	*value = -EINVAL;
-	if (qc_verify_hdl(cfg, "qc_get_attribute_float"))
+	if (qc_hdl_verify(cfg, "qc_get_attribute_float"))
 		return -4;
 	hdl = qc_get_layer_handle(cfg, layer);
 	qc_debug(cfg, "qc_get_attribute_float(attr=%d, layer=%d)\n", id, layer);

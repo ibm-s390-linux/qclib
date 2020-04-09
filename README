@@ -103,7 +103,7 @@ Release History:
     - Recognize IBM z15 midrange models
 
     Bug fixes:
-    - qc_open: Memory leak on error
+    - qc_open: Memory leaks on errors
 
 2.0.1
     Changes:
