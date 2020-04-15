@@ -93,6 +93,11 @@ For enhancements, please describe the proposed change and its benefits.
 Release History:
 ================
 
+2.1.x (tbd)
+    Changes:
+
+    Bug fixes:
+
 2.1.0 (2020-04-20)
     Changes:
     - New attributes in support of secure boot in all final layers:
