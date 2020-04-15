@@ -93,7 +93,7 @@ For enhancements, please describe the proposed change and its benefits.
 Release History:
 ================
 
-2.0.x
+2.1.0 (2020-04-20)
     Changes:
     - New attributes in support of secure boot in all final layers:
          * qc_has_secure
@@ -103,9 +103,9 @@ Release History:
     - Recognize IBM z15 midrange models
 
     Bug fixes:
-    - qc_open: Memory leaks on errors
+    - qc_open(): Memory leaks on errors
 
-2.0.1
+2.0.1 (2020-01-07)
     Changes:
     - Retry up to three times when a live guest migration is detected
 
@@ -115,7 +115,7 @@ Release History:
       qc_num_cpu_* attributes.
     - qc_dump: Handle non-writable /tmp
 
-2.0.0
+2.0.0 (2019-11-11)
     Changes:
     - Add support for z/OS Container Extensions (zCX)
     - New attributes in layer CEC:
@@ -131,13 +131,13 @@ Release History:
     - Disabled v1 compatibility functionality per default. To re-enable,
       activate CONFIG_V1_COMPATIBILITY in query_capacity.h.
 
-1.4.1
+1.4.1 (2018-06-25)
     Bug fixes:
     - qc_dump: Don't abort the dump in case qc_test fails.
     - Attributes qc_cp_weight_capping and qc_ifl_weight_capping were set even
       when initial capping was not set in the LPAR's activation profile.
 
-1.4.0
+1.4.0 (2018-04-10)
     Changes:
     - Added SMT support by properly differentiating between cores and CPUs.
       I.e. switched from qc_num_cpu_* to qc_num_core_* attributes in layers
@@ -168,14 +168,14 @@ Release History:
                   not. It therefore reports all cores as configured, which can
                   be wrong.
 
-1.3.1
+1.3.1 (2018-01-18)
     Bug fixes:
     - Security: Fix PATH attack vulnerability when dumping (see QC_DEBUG=2)
     - STHYI: Add fallback for pre-glibc 2.16 (not using getauxval())
     - Handle mismatching STHYI and /proc/sysinfo layer counts
     - On LPAR, fix incomplete dump of binary hypfs when textual hypfs is mounted
 
-1.3.0
+1.3.0 (2017-10-27)
     Changes:
     - Added STHYI support in LPAR
     - Added new env variable QC_DEBUG_FILE (see qc_open())
@@ -192,7 +192,7 @@ Release History:
     - Logs: Fix month in timestamp (was off by 1)
     - qc_test: Fix flags for qc_layer_name in QC_LAYER_TYPE_ZVM_HYPERVISOR
 
-1.2.0
+1.2.0 (2016-06-10)
     Changes:
     - Removed source [S] for attributes qc_num_cpu_dedicated and
       qc_num_cpu_shared in LPAR layer for consistency
@@ -215,7 +215,7 @@ Release History:
     - Display all values in attribute qc_partition_char in case of multiple
     - Set qc_cp_dispatch_type in presence of CPs only
 
-1.1.0
+1.1.0 (2016-02-15)
     Changes:
     - Makefile: Added targets 'clean' and 'install'
     - qc_test: Support command line options
@@ -231,7 +231,7 @@ Release History:
     - Consistency checks: Fixed wrong positive
     - Fixed source indicators in log
 
-1.0.0
+1.0.0 (2015-08-28)
     Changes:
     - Introduced new API, replacing the previous one
     - Renamed the following attributes for consistency:
