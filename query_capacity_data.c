@@ -122,8 +122,8 @@ struct qc_lpar {
 	char layer_extended_name[QC_LEN_LAYER_EXTENDED_NAME];
 	char layer_uuid[QC_LEN_LAYER_UUID];
 	int adjustment;
-        int has_secure;
-        int secure;
+	int has_secure;
+	int secure;
 	int num_core_total;
 	int num_core_configured;
 	int num_core_standby;
