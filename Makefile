@@ -4,13 +4,15 @@
 #     major : Backwards compatible changes to the API
 #     minor : Additions leaving the API unmodified
 #     bugfix: Bugfixes only
-VERSION = 2.1.x
-VERM    = $(shell echo $(VERSION) | cut -d '.' -f 1)
-CFLAGS ?= -g -Wall -O2
+VERSION  = 2.1.x
+VERM     = $(shell echo $(VERSION) | cut -d '.' -f 1)
+CFLAGS  ?= -g -Wall -O2
+LDFLAGS ?=
 CFILES  = query_capacity.c query_capacity_data.c query_capacity_sysinfo.c \
           query_capacity_sysfs.c query_capacity_hypfs.c query_capacity_sthyi.c
 OBJECTS = $(patsubst %.c,%.o,$(CFILES))
 .SUFFIXES: .o .c
+DOCDIR	?= /usr/share/doc/packages/
 
 ifneq ("${V}","1")
         MAKEFLAGS += --quiet
@@ -37,7 +39,7 @@ libqc.a: $(OBJECTS)
 	$(AR) rcs $@ $^
 
 libqc.so.$(VERSION): $(OBJECTS)
-	$(LINK) -Wl,-soname,libqc.so.$(VERM) -shared $^ -o $@
+	$(LINK) $(LDFLAGS) -Wl,-soname,libqc.so.$(VERM) -shared $^ -o $@
 	-rm libqc.so.$(VERM) 2>/dev/null
 	ln -s libqc.so.$(VERSION) libqc.so.$(VERM)
 
@@ -69,16 +71,16 @@ install: libqc.a libqc.so.$(VERSION)
 	ln -sr $(DESTDIR)/usr/lib64/libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so.$(VERM)
 	ln -sr $(DESTDIR)/usr/lib64/libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so
 	install -Dm 644 query_capacity.h $(DESTDIR)/usr/include/query_capacity.h
-	install -Dm 644 README $(DESTDIR)/usr/share/doc/packages/qclib/README
-	install -Dm 644 LICENSE $(DESTDIR)/usr/share/doc/packages/qclib/LICENSE
+	install -Dm 644 README $(DESTDIR)/$(DOCDIR)/qclib/README
+	install -Dm 644 LICENSE $(DESTDIR)/$(DOCDIR)/qclib/LICENSE
 
 installdoc: doc
 	echo "  INSTALLDOC"
-	install -dm 755 $(DESTDIR)/usr/share/doc/packages/qclib/html
-	cp -r html/* $(DESTDIR)/usr/share/doc/packages/qclib/html
-	chmod 644 $(DESTDIR)/usr/share/doc/packages/qclib/html/search/*
-	chmod 644 $(DESTDIR)/usr/share/doc/packages/qclib/html/*
-	chmod 755 $(DESTDIR)/usr/share/doc/packages/qclib/html/search
+	install -dm 755 $(DESTDIR)/$(DOCDIR)/qclib/html
+	cp -r html/* $(DESTDIR)/$(DOCDIR)/qclib/html
+	chmod 644 $(DESTDIR)/$(DOCDIR)/qclib/html/search/*
+	chmod 644 $(DESTDIR)/$(DOCDIR)/qclib/html/*
+	chmod 755 $(DESTDIR)/$(DOCDIR)/qclib/html/search
 
 clean:
 	echo "  CLEAN"
