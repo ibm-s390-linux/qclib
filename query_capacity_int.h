@@ -89,17 +89,17 @@ void qc_mark_dump_incomplete(struct qc_handle *hdl, char *missing_component);
 
 
 #ifdef CONFIG_DEBUG_TIMESTAMPS
-#define qc_debug(hdl, arg, ...)	if (qc_dbg_level > 0) { \
+#define qc_debug(hdl, arg, ...)	do if (qc_dbg_level > 0) { \
 					time_t t; \
 					struct tm *tm; \
 					time(&t); \
 					tm = localtime(&t); \
 					fprintf(qc_dbg_file, "%02d/%02d,%02d:%02d:%02d,%-10p: %*s" arg, \
 					tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, qc_get_root_handle(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
-				}
+				} while(0)
 #else
-#define qc_debug(hdl, arg, ...)	if (qc_dbg_level > 0) { \
+#define qc_debug(hdl, arg, ...)	do if (qc_dbg_level > 0) { \
 					fprintf(qc_dbg_file, "%-10p: %*s" arg, qc_get_root_handle(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
-				}
+				} while(0)
 #endif
 #endif
