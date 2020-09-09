@@ -111,7 +111,7 @@ static int qc_debug_file_init(void) {
 				goto out_err;
 			}
 		}
-		qc_debug(NULL, "This is qclib v2.1.0, level 3877f257, date 2020-04-15 22:20:26 +0200\n");
+		qc_debug(NULL, "This is qclib v2.2.0, level 33725a4f, date 2020-09-09 17:55:45 +0200\n");
 	}
 
 	return 0;
@@ -653,8 +653,8 @@ static int qc_post_process_KVM_host(struct qc_handle *hdl) {
 		rc |= qc_set_attr_int(hdl, qc_num_core_total, *num_conf, ATTR_SRC_POSTPROC) ||
 		      qc_copy_attr_value_rename(hdl, qc_num_core_dedicated, parent, qc_num_cpu_dedicated) ||
 		      qc_copy_attr_value_rename(hdl, qc_num_core_shared, parent, qc_num_cpu_shared);
-		      cps = qc_get_attr_value_int(parent, qc_num_cp_total);
-		      ifls = qc_get_attr_value_int(parent, qc_num_cp_total);
+		cps = qc_get_attr_value_int(parent, qc_num_cp_total);
+		ifls = qc_get_attr_value_int(parent, qc_num_cp_total);
 		if (cps && ifls && *cps && *ifls) {
 			// mixed-mode LPARs use CPs only!
 			rc |= qc_set_attr_int(hdl, qc_num_ifl_total, 0, ATTR_SRC_POSTPROC) ||
