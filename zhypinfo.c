@@ -167,8 +167,8 @@ static void print_help() {
 	printf("\n");
 	printf("  -h, --help           Print usage information and exit\n");
 	printf("  -j, --json           Dump all available data in JSON format\n");
-	printf("  -l, --layers         Print number of layers\n");
-	printf("  -L, --levels         Print number of virtualization levels\n");
+	printf("  -l, --layers         Print layer count\n");
+	printf("  -L, --levels         Print virtualization level count\n");
 	printf("\n");
 }
 
