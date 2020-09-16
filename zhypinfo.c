@@ -203,11 +203,13 @@ int main(int argc, char **argv) {
 		goto out;
 	if (json + lays + lvls > 1) {
 		fprintf(stderr, "Error: Only one of options --json, --layers and --levels is allowed\n");
-		return 2;
+		rc = 2;
+		goto out;
 	}
 	if (json) {
 		qc_export_json(hdl);
-		return 0;
+		rc = 0;
+		goto out;
 	}
 	rc = print_layers(hdl, lvls, lays);
 

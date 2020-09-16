@@ -97,6 +97,7 @@ Release History:
     Changes:
 
     Bug fixes:
+    - zhypinfo: Fix memory leaks
 
 2.2.0 (2020-09-09)
     Changes:
