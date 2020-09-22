@@ -150,7 +150,8 @@ static int qc_parse_sthyi_machine(struct qc_handle *cec, struct inf0mac *machine
 			    qc_set_attr_int(cec, qc_num_ziip_shared, htobe16(machine->infmsziip), ATTR_SRC_STHYI))
 				return -1;
 		}
-	}
+	} else
+		qc_debug(cec, "No processor counts information available (most likely due to missing GPD data)\n");
 
 	if (machine->infmval1 & infmmid) {
 		qc_debug(cec, "Add machine ID information\n");

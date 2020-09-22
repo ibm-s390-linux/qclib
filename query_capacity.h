@@ -371,7 +371,7 @@
  * \b [1] Available starting with RHEL7.2 and SLES12SP1<br>
  * \b [2] <I>z/Architecture Principles of Operation</I>, SA22-7832<br>
  * \b [3] <I>z/VM: CP Commands and Utilities Reference</I>, SC24-6175<br>
- * \b [4] Requires global performance data to be enabled in the LPAR's activation profile<br>
+ * \b [4] Requires global performance data (GDP) to be enabled in the LPAR's activation profile<br>
  * \b [5] As of this writing, in LPARs with both CPs and IFLs defined in its activation profile, only CPs can become operational.
  *        Therefore, IFL counts would not appear in any of #qc_num_core_configured, #qc_num_core_standby, #qc_num_core_reserved,
  *        #qc_num_core_dedicated or #qc_num_core_shared
