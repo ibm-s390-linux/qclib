@@ -232,7 +232,7 @@ static int qc_parse_sthyi_partition(struct qc_handle *lpar, struct inf0par *part
 	if (partition->infpval1 & infplgvl && (rc = qc_is_nonempty_ebcdic((__u64*)partition->infplgnm)) > 0) {
 		/* LPAR group is only defined in case group name is not empty */
 		qc_debug(lpar, "Insert LPAR group layer\n");
-		if (qc_insert_handle(lpar, &group, QC_LAYER_TYPE_LPAR_GROUP)) {
+		if (qc_hdl_insert(lpar, &group, QC_LAYER_TYPE_LPAR_GROUP)) {
 			qc_debug(lpar, "Error: Failed to insert LPAR group layer\n");
 			goto out_err;
 		}
@@ -427,7 +427,7 @@ static int qc_parse_sthyi_guest(struct qc_handle *gst, struct inf0gst *guest) {
 			goto err;
 		}
 		qc_debug(gst, "Layer %2d: %s\n", gst->layer_no, str);
-		if (qc_insert_handle(gst, &pool_hdl, ptype)) {
+		if (qc_hdl_insert(gst, &pool_hdl, ptype)) {
 			qc_debug(gst, "Error: Failed to insert pool layer\n");
 			goto err;
 		}
@@ -528,7 +528,7 @@ static int qc_sthyi_process(struct qc_handle *hdl, char *buf) {
 		goto out;
 	}
 
-	hdl = qc_get_lpar_handle(hdl);
+	hdl = qc_hdl_get_lpar(hdl);
 	if (!hdl) {
 		qc_debug(hdl, "Error: No LPAR handle found\n");
 		rc = -4;

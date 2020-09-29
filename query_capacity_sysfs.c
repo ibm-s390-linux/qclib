@@ -330,7 +330,7 @@ static int qc_sysfs_process(struct qc_handle *hdl, char *data) {
 
 	// Set top layer attributes.
 	// Note: This implies that all top layers must feature these attributes!
-	hdl = qc_get_top_handle(hdl);
+	hdl = qc_hdl_get_top(hdl);
 	if ((p->has_secure >= 0 && qc_set_attr_int(hdl, qc_has_secure, p->has_secure, ATTR_SRC_SYSFS)) ||
 	    (p->secure >= 0 && qc_set_attr_int(hdl, qc_secure, p->secure, ATTR_SRC_SYSFS))) {
 		rc = -1;

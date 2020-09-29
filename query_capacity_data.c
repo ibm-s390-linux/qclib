@@ -732,8 +732,18 @@ const char *qc_attr_id_to_char(struct qc_handle *hdl, enum qc_attr_id id) {
 	return NULL;
 }
 
+struct qc_handle *qc_hdl_get_cec(struct qc_handle *hdl) {
+	return hdl ? hdl->root : hdl;
+}
+
+struct qc_handle *qc_hdl_get_lpar(struct qc_handle *hdl) {
+	for (hdl = hdl->root; hdl != NULL && *(int *)(hdl->layer) != QC_LAYER_TYPE_LPAR; hdl = hdl->next);
+
+	return hdl;
+}
+
 // 'hdl' is for error reporting, as 'tgthdl' might not be part of the pointer lists yet
-int qc_new_handle(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no,
+int qc_hdl_new(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no,
 		  int layer_type_num) {
 	int num_attrs, layer_category_num;
 	char *layer_type, *layer_category;
@@ -823,7 +833,7 @@ int qc_new_handle(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no
 		layer_type = "z/OS-zCX-Server";
 		break;
 	default:
-		qc_debug(hdl, "Error: Unhandled layer type in qc_new_handle()\n");
+		qc_debug(hdl, "Error: Unhandled layer type in qc_hdl_new()\n");
 		return -1;
 	}
 
@@ -874,12 +884,12 @@ int qc_new_handle(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no
 	return 0;
 }
 
-int qc_insert_handle(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int type) {
-	struct qc_handle *prev_hdl = qc_get_prev_handle(hdl);
+int qc_hdl_insert(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int type) {
+	struct qc_handle *prev_hdl = qc_hdl_get_prev(hdl);
 
 	if (!prev_hdl)
 		return -1;
-	if (qc_new_handle(hdl, inserted_hdl, hdl->layer_no, type))
+	if (qc_hdl_new(hdl, inserted_hdl, hdl->layer_no, type))
 		return -2;
 	(*inserted_hdl)->next = hdl;
 	prev_hdl->next = *inserted_hdl;
@@ -894,10 +904,10 @@ void qc_hdl_prune(struct qc_handle *hdl) {
         struct qc_handle *ptr = hdl, *skip = NULL;
 
         // Pruning at the root needs special handling as does intermediate pruning
-        if (hdl == qc_get_root_handle(hdl))
+        if (hdl == qc_hdl_get_root(hdl))
                 skip = hdl;
         else {
-                hdl = qc_get_prev_handle(hdl);
+                hdl = qc_hdl_get_prev(hdl);
                 hdl->next = NULL;
         }
 
@@ -917,10 +927,14 @@ void qc_hdl_prune(struct qc_handle *hdl) {
 	return;
 }
 
-int qc_append_handle(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type) {
+int qc_hdl_get_layer_no(struct qc_handle *hdl) {
+        return hdl->layer_no;
+}
+
+int qc_hdl_append(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type) {
 	struct qc_handle *next_hdl = hdl->next;
 
-	if (qc_new_handle(hdl, appended_hdl, hdl->layer_no + 1, type))
+	if (qc_hdl_new(hdl, appended_hdl, hdl->layer_no + 1, type))
 		return -1;
 	hdl->next = *appended_hdl;
 	(*appended_hdl)->next = next_hdl;
@@ -1114,17 +1128,17 @@ int qc_is_attr_set_string(struct qc_handle *hdl, enum qc_attr_id id) {
 	return qc_is_attr_set(hdl, id, string);
 }
 
-struct qc_handle *qc_get_root_handle(struct qc_handle *hdl) {
+struct qc_handle *qc_hdl_get_root(struct qc_handle *hdl) {
 	return hdl ? hdl->root : NULL;
 }
 
-struct qc_handle *qc_get_top_handle(struct qc_handle *hdl) {
+struct qc_handle *qc_hdl_get_top(struct qc_handle *hdl) {
 	for (; hdl->next != NULL; hdl = hdl->next);
 
 	return hdl;
 }
 
-struct qc_handle *qc_get_prev_handle(struct qc_handle *hdl) {
+struct qc_handle *qc_hdl_get_prev(struct qc_handle *hdl) {
 	struct qc_handle *prev_hdl = NULL;
 
 	for (prev_hdl = hdl->root; prev_hdl->next != NULL; prev_hdl = prev_hdl->next)

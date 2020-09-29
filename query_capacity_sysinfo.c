@@ -239,12 +239,12 @@ static int qc_fill_in_sysinfo_values_vm(struct qc_handle *hdl, char **sptr, char
 			goto out;
 		}
 		if (!hdl->next)
-			rc = qc_append_handle(hdl, &hosthdl, hosttype);
+			rc = qc_hdl_append(hdl, &hosthdl, hosttype);
 		else
-			rc = qc_insert_handle(hdl->next, &hosthdl, hosttype);
+			rc = qc_hdl_insert(hdl->next, &hosthdl, hosttype);
 		if (rc)
 			goto out;
-		if (qc_append_handle(hosthdl, &guesthdl, guesttype))
+		if (qc_hdl_append(hosthdl, &guesthdl, guesttype))
 			goto out_err;
 		if (qc_set_attr_string(hosthdl, qc_control_program_id, str_buf, ATTR_SRC_SYSINFO) ||
 		    qc_set_attr_string(guesthdl, qc_layer_name, layer_name, ATTR_SRC_SYSINFO))
@@ -428,7 +428,7 @@ out:
 }
 
 static int qc_sysinfo_process(struct qc_handle *hdl, char *sysinfo) {
-	struct qc_handle *lparhdl = qc_get_lpar_handle(hdl);
+	struct qc_handle *lparhdl = qc_hdl_get_lpar(hdl);
 	char *sysi = NULL, *start, *sptr, *line;
 	int rc = -1;
 

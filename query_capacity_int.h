@@ -65,18 +65,19 @@ extern struct qc_data_src sysinfo, sysfs, hypfs, sthyi;
 /* Utility functions */
 int qc_ebcdic_to_ascii(struct qc_handle *hdl, char *inbuf, size_t insz);
 int qc_is_nonempty_ebcdic(__u64 *str);
-int qc_new_handle(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no, int layer_type);
+int qc_hdl_new(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no, int layer_type);
 // Insert new layer 'inserted_hdl' of type 'type' before 'hdl'. Won't support inserting a new root
-int qc_insert_handle(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int type);
+int qc_hdl_insert(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int type);
 // Insert new layer 'appended_hdl' of type 'type' after 'hdl'
-int qc_append_handle(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type);
+int qc_hdl_append(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type);
 // Remove the layer pointed to by the handle and all layers on top
 void qc_hdl_prune(struct qc_handle *hdl);
-struct qc_handle *qc_get_cec_handle(struct qc_handle *hdl);
-struct qc_handle *qc_get_lpar_handle(struct qc_handle *hdl);
-struct qc_handle *qc_get_root_handle(struct qc_handle *hdl);
-struct qc_handle *qc_get_prev_handle(struct qc_handle *hdl);
-struct qc_handle *qc_get_top_handle(struct qc_handle *hdl);
+struct qc_handle *qc_hdl_get_cec(struct qc_handle *hdl);
+struct qc_handle *qc_hdl_get_lpar(struct qc_handle *hdl);
+struct qc_handle *qc_hdl_get_root(struct qc_handle *hdl);
+struct qc_handle *qc_hdl_get_top(struct qc_handle *hdl);
+struct qc_handle *qc_hdl_get_prev(struct qc_handle *hdl);
+int qc_hdl_get_layer_no(struct qc_handle *hdl);
 
 /* Debugging-related functions and variables */
 extern long  qc_dbg_level;
@@ -97,11 +98,11 @@ void qc_mark_dump_incomplete(struct qc_handle *hdl, char *missing_component);
 					time(&t); \
 					tm = localtime(&t); \
 					fprintf(qc_dbg_file, "%02d/%02d,%02d:%02d:%02d,%-10p: %*s" arg, \
-					tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, qc_get_root_handle(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
+					tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, qc_hdl_get_root(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
 				} }while(0);
 #else
 #define qc_debug(hdl, arg, ...)	do {if (qc_dbg_level > 0) { \
-					fprintf(qc_dbg_file, "%-10p: %*s" arg, qc_get_root_handle(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
+					fprintf(qc_dbg_file, "%-10p: %*s" arg, qc_hdl_get_root(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
 				} } while(0);
 #endif
 #endif

@@ -30,16 +30,6 @@ static void __attribute__((destructor)) qc_destructor(void) {
 		iconv_close(qc_cd);
 }
 
-struct qc_handle *qc_get_cec_handle(struct qc_handle *hdl) {
-	return hdl ? hdl->root : hdl;
-}
-
-struct qc_handle *qc_get_lpar_handle(struct qc_handle *hdl) {
-	for (hdl = hdl->root; hdl != NULL && *(int *)(hdl->layer) != QC_LAYER_TYPE_LPAR; hdl = hdl->next);
-
-	return hdl;
-}
-
 /* Update dbg_level from environment variable */
 static void qc_update_dbg_level(void) {
 	char *s, *end;
@@ -615,7 +605,7 @@ static int qc_post_process_LPAR(struct qc_handle *hdl) {
 }
 
 static int qc_post_process_KVM_host(struct qc_handle *hdl) {
-	struct qc_handle *parent = qc_get_prev_handle(hdl);
+	struct qc_handle *parent = qc_hdl_get_prev(hdl);
 	int *num_conf, rc, *cps, *ifls;
 
 	qc_debug(hdl, "Fill KVM host layer\n");
@@ -660,7 +650,7 @@ static int qc_post_process_KVM_host(struct qc_handle *hdl) {
 }
 
 static int qc_post_process_KVM_guest(struct qc_handle *hdl) {
-	struct qc_handle *parent = qc_get_prev_handle(hdl);
+	struct qc_handle *parent = qc_hdl_get_prev(hdl);
 	int rc = 0, *num_conf, *num_CPs, *num_IFLs;
 
 	qc_debug(hdl, "Fill KVM guest layer\n");
@@ -702,7 +692,7 @@ static int qc_post_processing(struct qc_handle *hdl) {
 
 	qc_debug(hdl, "Post processing: Fill KVM layers\n");
 	qc_debug_indent_inc();
-	for (hdl = qc_get_root_handle(hdl); hdl; hdl = hdl->next) {
+	for (hdl = qc_hdl_get_root(hdl); hdl; hdl = hdl->next) {
 		if (((int *)(hdl->layer))[1] == QC_LAYER_CAT_HOST)
 			top_host = hdl;
 		switch(*(int *)(hdl->layer)) {
@@ -759,8 +749,8 @@ static void *_qc_open(struct qc_handle *hdl, int *rc) {
 	qc_debug(hdl, "_qc_open()\n");
 	qc_debug_indent_inc();
 	*rc = 0;
-	if (qc_new_handle(NULL, &hdl, 0, QC_LAYER_TYPE_CEC) ||
-	    qc_new_handle(hdl, &lparhdl, 1, QC_LAYER_TYPE_LPAR)) {
+	if (qc_hdl_new(NULL, &hdl, 0, QC_LAYER_TYPE_CEC) ||
+	    qc_hdl_new(hdl, &lparhdl, 1, QC_LAYER_TYPE_LPAR)) {
 		*rc = -1;
 		goto out;
 	}

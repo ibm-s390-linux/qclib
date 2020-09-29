@@ -310,7 +310,7 @@ static int qc_fill_in_hypfs_lpar_values(struct qc_handle *hdl, const char *hypfs
 
 	qc_debug(hdl, "Add LPAR values from textual hypfs API\n");
 	qc_debug_indent_inc();
-	hdl = qc_get_lpar_handle(hdl);
+	hdl = qc_get_lpar(hdl);
 	if ((s = qc_get_attr_value_string(hdl, qc_layer_name)) == NULL) {
 		rc = -1;
 		goto out;
@@ -441,7 +441,7 @@ static int qc_fill_in_hypfs_lpar_values_bin(struct qc_handle *hdl, __u8 *data) {
 		sys_hdr = (struct dfs_sys_hdr *)cpu;
 	}
 	qc_debug(hdl, "Found %d cpus total (%d CP, %d IFL, %d zIIP, %d UN)\n", cp + ifl + ziip + un, cp, ifl, ziip, un);
-	hdl = qc_get_lpar_handle(hdl);
+	hdl = qc_hdl_get_lpar(hdl);
 	if (qc_set_attr_int(hdl, qc_num_cp_total, cp, ATTR_SRC_HYPFS) ||
 	    qc_set_attr_int(hdl, qc_num_cp_dedicated, cp_ded, ATTR_SRC_HYPFS) ||
 	    qc_set_attr_int(hdl, qc_num_cp_shared, cp - cp_ded, ATTR_SRC_HYPFS) ||
@@ -456,9 +456,9 @@ static int qc_fill_in_hypfs_lpar_values_bin(struct qc_handle *hdl, __u8 *data) {
 	    qc_set_attr_int(hdl, qc_ziip_absolute_capping, ziip_abs_cap * 0x10000 / 100, ATTR_SRC_HYPFS))
 		goto out_err;
 	if (gpd_available) {
-		cp_sh = qc_get_attr_value_int(qc_get_cec_handle(hdl), qc_num_cp_shared);
-		ifl_sh = qc_get_attr_value_int(qc_get_cec_handle(hdl), qc_num_ifl_shared);
-		ziip_sh = qc_get_attr_value_int(qc_get_cec_handle(hdl), qc_num_ziip_shared);
+		cp_sh = qc_get_attr_value_int(qc_hdl_get_cec(hdl), qc_num_cp_shared);
+		ifl_sh = qc_get_attr_value_int(qc_hdl_get_cec(hdl), qc_num_ifl_shared);
+		ziip_sh = qc_get_attr_value_int(qc_hdl_get_cec(hdl), qc_num_ziip_shared);
 		if (cap_active && cp_sh && ifl_sh &&
 		    (qc_set_attr_int(hdl, qc_cp_weight_capping, cp_weight ? *cp_sh * 0x10000 * cp_weight / cp_all_weight : 0, ATTR_SRC_HYPFS) ||
 		     qc_set_attr_int(hdl, qc_ifl_weight_capping, ifl_weight ? *ifl_sh * 0x10000 * ifl_weight / ifl_all_weight : 0, ATTR_SRC_HYPFS) ||
@@ -468,7 +468,7 @@ static int qc_fill_in_hypfs_lpar_values_bin(struct qc_handle *hdl, __u8 *data) {
 	if (qc_is_nonempty_ebcdic((__u64*)tgt_lpar->grp_name)) {
 		/* LPAR group is only defined in case group name is not binary zero */
 		qc_debug(hdl, "Insert LPAR group layer\n");
-		if (qc_insert_handle(hdl, &group, QC_LAYER_TYPE_LPAR_GROUP)) {
+		if (qc_hdl_insert(hdl, &group, QC_LAYER_TYPE_LPAR_GROUP)) {
 			qc_debug(hdl, "Error: Failed to insert LPAR group layer\n");
 			goto out_err;
 		}
