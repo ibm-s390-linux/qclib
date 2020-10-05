@@ -1,18 +1,25 @@
-# Copyright IBM Corp. 2013, 2017
+# Copyright IBM Corp. 2013, 2020
 
 # Versioning scheme: major.minor.bugfix
 #     major : Backwards compatible changes to the API
 #     minor : Additions leaving the API unmodified
 #     bugfix: Bugfixes only
-VERSION  = 2.2.99
-VERM     = $(shell echo $(VERSION) | cut -d '.' -f 1)
-CFLAGS  ?= -g -Wall -O2
-LDFLAGS ?=
+VERSION    = 2.2.99
+VERM       = $(shell echo $(VERSION) | cut -d '.' -f 1)
+CFLAGS    ?= -g -Wall -O2
+LDFLAGS   ?=
+INSTFLAGS ?= -p
 CFILES  = query_capacity.c query_capacity_data.c query_capacity_sysinfo.c \
           query_capacity_sysfs.c query_capacity_hypfs.c query_capacity_sthyi.c
 OBJECTS = $(patsubst %.c,%.o,$(CFILES))
 .SUFFIXES: .o .c
-DOCDIR	?= /usr/share/doc/packages/
+PREFIX  ?= /usr
+BINDIR   = ${PREFIX}/bin
+DOCDIR	 = ${PREFIX}/share/doc/packages
+INCDIR   = ${PREFIX}/include
+LIBDIR   = ${PREFIX}/lib64
+MANDIR   = ${PREFIX}/share/man
+
 
 ifneq ("${V}","1")
         MAKEFLAGS += --quiet
@@ -26,10 +33,6 @@ AR	= $(call cmd,"  AR    ",$@)ar
 DOC	= $(call cmd,"  DOC   ",$@)doxygen
 TAR	= $(call cmd,"  TAR   ",$@)tar
 GEN	= $(call cmd,"  GEN   ",$@)grep
-
-INSTALL_FLAGS_BIN = -g $(GROUP) -o $(OWNER) -m755
-INSTALL_FLAGS_MAN = -g $(GROUP) -o $(OWNER) -m644
-INSTALL_FLAGS_LIB = -g $(GROUP) -o $(OWNER) -m755
 
 all: libqc.a libqc.so.$(VERSION) qc_test qc_test-sh zname zhypinfo
 
@@ -48,16 +51,16 @@ libqc.so.$(VERSION): $(OBJECTS)
 	ln -s libqc.so.$(VERSION) libqc.so.$(VERM)
 
 zname: zname.c zhypinfo.h libqc.so.$(VERSION)
-	$(CC) $(CFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
+	$(CC) $(CFLAGS) $(LDFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
 
 zhypinfo: zhypinfo.c zhypinfo.h libqc.so.$(VERSION)
-	$(CC) $(CFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
+	$(CC) $(CFLAGS) $(LDFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
 
 qc_test: qc_test.c libqc.a
 	$(CC) $(CFLAGS) -static $< -L. -lqc -o $@
 
 qc_test-sh: qc_test.c libqc.so.$(VERSION)
-	$(CC) $(CFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
+	$(CC) $(CFLAGS) $(LDFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
 
 test: qc_test
 	./$<
@@ -74,27 +77,27 @@ html: $(CFILES) query_capacity.h query_capacity_int.h query_capacity_data.h hcpi
 		echo "Error: 'doxygen' not installed"; \
 	fi
 
-install: libqc.a libqc.so.$(VERSION)
+install: libqc.a libqc.so.$(VERSION) zhypinfo zname
 	echo "  INSTALL"
-	install -Dm 644 libqc.a $(DESTDIR)/usr/lib64/libqc.a
-	install -Dm 755 libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so.$(VERSION)
-	ln -sr $(DESTDIR)/usr/lib64/libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so.$(VERM)
-	ln -sr $(DESTDIR)/usr/lib64/libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so
-	install -Dm 755 zname $(DESTDIR)/usr/bin/zname
-	install -Dm 755 zhypinfo $(DESTDIR)/usr/bin/zhypinfo
-	install -Dm 644 zname.8 $(DESTDIR)/usr/share/man8/zname.8
-	install -Dm 644 zhypinfo.8 $(DESTDIR)/usr/share/man8/zhypinfo.8
-	install -Dm 644 query_capacity.h $(DESTDIR)/usr/include/query_capacity.h
-	install -Dm 644 README $(DESTDIR)/$(DOCDIR)/qclib/README
-	install -Dm 644 LICENSE $(DESTDIR)/$(DOCDIR)/qclib/LICENSE
+	install $(INSTFLAGS) -Dm 644 libqc.a $(DESTDIR)$(LIBDIR)/libqc.a
+	install $(INSTFLAGS) -Dm 755 libqc.so.$(VERSION) $(DESTDIR)$(LIBDIR)/libqc.so.$(VERSION)
+	ln -sr $(DESTDIR)$(LIBDIR)/libqc.so.$(VERSION) $(DESTDIR)$(LIBDIR)/libqc.so.$(VERM)
+	ln -sr $(DESTDIR)$(LIBDIR)/libqc.so.$(VERSION) $(DESTDIR)$(LIBDIR)/libqc.so
+	install $(INSTFLAGS) -Dm 755 zname $(DESTDIR)$(BINDIR)/zname
+	install $(INSTFLAGS) -Dm 755 zhypinfo $(DESTDIR)$(BINDIR)/zhypinfo
+	install $(INSTFLAGS) -Dm 644 zname.8 $(DESTDIR)$(MANDIR)/man8/zname.8
+	install $(INSTFLAGS) -Dm 644 zhypinfo.8 $(DESTDIR)$(MANDIR)/man8/zhypinfo.8
+	install $(INSTFLAGS) -Dm 644 query_capacity.h $(DESTDIR)$(INCDIR)/query_capacity.h
+	install $(INSTFLAGS) -Dm 644 README $(DESTDIR)$(DOCDIR)/qclib/README
+	install $(INSTFLAGS) -Dm 644 LICENSE $(DESTDIR)$(DOCDIR)/qclib/LICENSE
 
 installdoc: doc
 	echo "  INSTALLDOC"
-	install -dm 755 $(DESTDIR)/$(DOCDIR)/qclib/html
-	cp -r html/* $(DESTDIR)/$(DOCDIR)/qclib/html
-	chmod 644 $(DESTDIR)/$(DOCDIR)/qclib/html/search/*
-	chmod 644 $(DESTDIR)/$(DOCDIR)/qclib/html/*
-	chmod 755 $(DESTDIR)/$(DOCDIR)/qclib/html/search
+	install $(INSTFLAGS) -dm 755 $(DESTDIR)$(DOCDIR)/qclib/html
+	cp -rp html/* $(DESTDIR)$(DOCDIR)/qclib/html
+	chmod 644 $(DESTDIR)$(DOCDIR)/qclib/html/search/*
+	chmod 644 $(DESTDIR)$(DOCDIR)/qclib/html/*
+	chmod 755 $(DESTDIR)$(DOCDIR)/qclib/html/search
 
 clean:
 	echo "  CLEAN"

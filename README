@@ -98,6 +98,7 @@ Release History:
 
     Bug fixes:
     - zhypinfo: Fix memory leaks
+    - Makefile: Various fixes
 
 2.2.0 (2020-09-09)
     Changes:
