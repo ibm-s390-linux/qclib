@@ -86,6 +86,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Release History
 ---------------
+* __v2.2.x (tbd)__
+
+    _Changes_:
+
+    _Bug fixes_:
 
 * __v2.2.1 (2020-10-14)__
 
