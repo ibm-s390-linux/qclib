@@ -100,6 +100,7 @@ Release History:
          * qc_secure
       Note: Changed src column indicator from 'o' to 'F' to summarize
             firmware-related data
+    - Recognize IBM z15 midrange models
 
     Bug fixes:
     - qc_open: Memory leak on error
