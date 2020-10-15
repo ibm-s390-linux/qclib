@@ -717,7 +717,7 @@ int qc_get_num_layers(void *hdl, int *rc);
  * - 1: LPAR layer information, etc.
  * @param value Return parameter returning the string attribute's value or NULL
  * in case of an error.
- @return Indicating validity of the queried attribute as follows:
+ * @return Indicating validity of the queried attribute as follows:
  * - >0  attribute is valid
  * -  0  attribute exists but is not set
  * - <0  an error occurred retrieving the attribute
@@ -739,7 +739,7 @@ int qc_get_attribute_string(void *hdl, enum qc_attr_id id, int layer, const char
  * - 1: LPAR layer information, etc.
  * @param value Return parameter returning the string attribute's value or undefined
  * in case of an error.
- @return Indicating validity of the queried attribute as follows:
+ * @return Indicating validity of the queried attribute as follows:
  * - >0  attribute is valid
  * -  0  attribute exists but is not set
  * - <0  an error occurred retrieving the attribute
@@ -762,11 +762,17 @@ int qc_get_attribute_int(void *hdl, enum qc_attr_id id, int layer, int *value);
  * - 1: LPAR layer information, etc.
  * @param value Return parameter returning the float attribute's value or undefined
  * in case of an error.indicating validity as follows:
- @return Indicating validity of the queried attribute as follows:
+ * @return Indicating validity of the queried attribute as follows:
  * - >0  attribute is valid
  * -  0  attribute exists but is not set
  * - <0  an error occurred retrieving the attribute
  */
 int qc_get_attribute_float(void *hdl, enum qc_attr_id id, int layer, float *value);
+
+/**
+ * Prints the internal data in JSON format to stdout.
+ * @param hdl Handle of the configuration to use.
+ */
+void qc_export_json(void *hdl);
 
 #endif

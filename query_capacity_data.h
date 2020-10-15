@@ -26,4 +26,7 @@ char  *qc_get_attr_value_string(struct qc_handle *hdl, enum qc_attr_id id);
 char qc_get_attr_value_src_int(struct qc_handle *hdl, enum qc_attr_id id);
 char qc_get_attr_value_src_float(struct qc_handle *hdl, enum qc_attr_id id);
 char qc_get_attr_value_src_string(struct qc_handle *hdl, enum qc_attr_id id);
+
+// print all attributes in the list in json format
+void qc_print_attrs_json(struct qc_handle *hdl, int indent);
 #endif

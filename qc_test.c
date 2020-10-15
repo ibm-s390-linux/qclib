@@ -872,17 +872,17 @@ int get_handle(void **hdl, int *layers, int quiet) {
 	*hdl = qc_open(&rc);
 	if (rc < 0) {
 		if (!quiet)
-			printf("Error: Could not open configuration, rc=%d\n", rc);
+			printf("Error: Could not open capacity data, rc=%d\n", rc);
 		return 1;
 	}
 	if (rc > 0) {
 		if (!quiet)
-			printf("Warning: Configuration could not be opened completely, rc=%d\n", rc);
+			printf("Warning: Capacity data inconsistent, try again later (rc=%d)\n", rc);
 		return 2;
 	}
 	if (!*hdl) {
 		if (!quiet)
-			printf("Error: Could not open configuration\n");
+			printf("Error: Capacity data returned invalid handle, rc=%d\n", rc);
 		return 3;
 	}
 	*layers = qc_get_num_layers(*hdl, &rc);

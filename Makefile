@@ -27,7 +27,11 @@ DOC	= $(call cmd,"  DOC   ",$@)doxygen
 TAR	= $(call cmd,"  TAR   ",$@)tar
 GEN	= $(call cmd,"  GEN   ",$@)grep
 
-all: libqc.a libqc.so.$(VERSION) qc_test qc_test-sh
+INSTALL_FLAGS_BIN = -g $(GROUP) -o $(OWNER) -m755
+INSTALL_FLAGS_MAN = -g $(GROUP) -o $(OWNER) -m644
+INSTALL_FLAGS_LIB = -g $(GROUP) -o $(OWNER) -m755
+
+all: libqc.a libqc.so.$(VERSION) qc_test qc_test-sh zname zhypinfo
 
 hcpinfbk_qclib.h: hcpinfbk.h
 	$(GEN) -ve "^#pragma " $< > $@	# strip off z/VM specific pragmas
@@ -42,6 +46,12 @@ libqc.so.$(VERSION): $(OBJECTS)
 	$(LINK) $(LDFLAGS) -Wl,-soname,libqc.so.$(VERM) -shared $^ -o $@
 	-rm libqc.so.$(VERM) 2>/dev/null
 	ln -s libqc.so.$(VERSION) libqc.so.$(VERM)
+
+zname: zname.c zhypinfo.h libqc.so.$(VERSION)
+	$(CC) $(CFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
+
+zhypinfo: zhypinfo.c zhypinfo.h libqc.so.$(VERSION)
+	$(CC) $(CFLAGS) -L. $< -o $@ libqc.so.$(VERSION)
 
 qc_test: qc_test.c libqc.a
 	$(CC) $(CFLAGS) -static $< -L. -lqc -o $@
@@ -70,6 +80,10 @@ install: libqc.a libqc.so.$(VERSION)
 	install -Dm 755 libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so.$(VERSION)
 	ln -sr $(DESTDIR)/usr/lib64/libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so.$(VERM)
 	ln -sr $(DESTDIR)/usr/lib64/libqc.so.$(VERSION) $(DESTDIR)/usr/lib64/libqc.so
+	install -Dm 755 zname $(DESTDIR)/usr/bin/zname
+	install -Dm 755 zhypinfo $(DESTDIR)/usr/bin/zhypinfo
+	install -Dm 644 zname.8 $(DESTDIR)/usr/share/man8/zname.8
+	install -Dm 644 zhypinfo.8 $(DESTDIR)/usr/share/man8/zhypinfo.8
 	install -Dm 644 query_capacity.h $(DESTDIR)/usr/include/query_capacity.h
 	install -Dm 644 README $(DESTDIR)/$(DOCDIR)/qclib/README
 	install -Dm 644 LICENSE $(DESTDIR)/$(DOCDIR)/qclib/LICENSE
@@ -86,3 +100,4 @@ clean:
 	echo "  CLEAN"
 	rm -f $(OBJECTS) libqc.a libqc.so.$(VERSION) qc_test qc_test-sh hcpinfbk_qclib.h
 	rm -rf html libqc.so.$(VERM)
+	rm -rf zname zhypinfo

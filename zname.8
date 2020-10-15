@@ -1,0 +1,49 @@
+.\" Copyright IBM Corp. 2020
+.\" ----------------------------------------------------------------------
+
+.TH ZNAME 8 "September 2020" "qclib" "System Administration Commands"
+
+.SH NAME
+zname \- Print information about the IBM Z hardware.
+
+.SH SYNOPSIS
+
+.B zname [OPTIONS]
+
+
+
+
+.SH OPTIONS
+By default,
+.B zname
+shows the model name. If any information is not available, '<unavailable>'
+is returned instead.
+.TP
+.BR "\-a, \-\-all"
+Print all available information.
+.TP
+.BR "\-c, \-\-capacity"
+Print capacity information.
+.TP
+.BR "\-i, \-\-cpuid"
+Print the CPU identifier.
+.TP
+.BR "\-h, \-\-help"
+Print usage information and exit.
+.TP
+.BR "\-m, \-\-model"
+Print model information.
+.TP
+.BR "\-n, \-\-name"
+Print the model name (default).
+.TP
+.BR "\-u, \-\-manufacturer"
+Print manufacturer information.
+
+.SH RETURN CODES
+Successful \fBzname\fR commands return 0.
+If an error occurs, \fBzname\fR writes a message to stderr and
+completes with a return code other than 0.
+.P
+.SH SEE ALSO
+.BR zhypinfo (8)

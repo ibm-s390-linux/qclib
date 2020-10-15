@@ -1,4 +1,4 @@
-/* Copyright IBM Corp. 2013, 2019 */
+/* Copyright IBM Corp. 2013, 2020 */
 
 #define _GNU_SOURCE
 
@@ -629,7 +629,7 @@ static int qc_post_process_LPAR(struct qc_handle *hdl) {
 
 static int qc_post_process_KVM_host(struct qc_handle *hdl) {
 	struct qc_handle *parent = qc_get_prev_handle(hdl);
-	int *num_conf, rc;
+	int *num_conf, rc, *cps, *ifls;
 
 	qc_debug(hdl, "Fill KVM host layer\n");
 	qc_debug_indent_inc();
@@ -647,13 +647,25 @@ static int qc_post_process_KVM_host(struct qc_handle *hdl) {
 	num_conf = qc_get_attr_value_int(parent, qc_num_core_configured);
 	if (!num_conf)
 		num_conf = qc_get_attr_value_int(parent, qc_num_cpu_configured);
-	rc |= !num_conf ||
-	      qc_set_attr_int(hdl, qc_num_core_total, *num_conf, ATTR_SRC_POSTPROC) ||
-	      qc_copy_attr_value_rename(hdl, qc_num_core_dedicated, parent, qc_num_cpu_dedicated) ||
-	      qc_copy_attr_value_rename(hdl, qc_num_core_shared, parent, qc_num_cpu_shared) ||
-	      qc_copy_attr_value(hdl, parent, qc_num_ifl_total) ||
-	      qc_copy_attr_value(hdl, parent, qc_num_ifl_dedicated) ||
-	      qc_copy_attr_value(hdl, parent, qc_num_ifl_shared);
+	if (!num_conf)
+		rc = 1;
+	if (!rc) {
+		rc |= qc_set_attr_int(hdl, qc_num_core_total, *num_conf, ATTR_SRC_POSTPROC) ||
+		      qc_copy_attr_value_rename(hdl, qc_num_core_dedicated, parent, qc_num_cpu_dedicated) ||
+		      qc_copy_attr_value_rename(hdl, qc_num_core_shared, parent, qc_num_cpu_shared);
+		      cps = qc_get_attr_value_int(parent, qc_num_cp_total);
+		      ifls = qc_get_attr_value_int(parent, qc_num_cp_total);
+		if (cps && ifls && *cps && *ifls) {
+			// mixed-mode LPARs use CPs only!
+			rc |= qc_set_attr_int(hdl, qc_num_ifl_total, 0, ATTR_SRC_POSTPROC) ||
+			      qc_set_attr_int(hdl, qc_num_ifl_dedicated, 0, ATTR_SRC_POSTPROC) ||
+			      qc_set_attr_int(hdl, qc_num_ifl_shared, 0, ATTR_SRC_POSTPROC);
+		} else {
+			rc |= qc_copy_attr_value(hdl, parent, qc_num_ifl_total) ||
+			      qc_copy_attr_value(hdl, parent, qc_num_ifl_dedicated) ||
+			      qc_copy_attr_value(hdl, parent, qc_num_ifl_shared);
+		}
+	}
 
 	qc_debug_indent_dec();
 
@@ -1031,4 +1043,34 @@ out:
 	qc_debug_indent_dec();
 
 	return rc;
+}
+
+static void qc_start_object(int *jindent, int layer) {
+	printf("%*s\"Layer %d\": {\n", *jindent, "", layer);
+	*jindent += 2;
+}
+static void qc_end_object(int *jindent, int final) {
+	*jindent -= 2;
+	printf("%*s}%s\n", *jindent, "", (final ? "" : ","));
+}
+
+void qc_export_json(void *cfg) {
+	struct qc_handle *hdl = (struct qc_handle *)cfg;
+	int jindent = 0;	// indent for json output
+	int i;
+
+	if (!hdl)
+		return;
+
+	printf("{\n");
+	jindent += 2;
+	for (hdl = hdl->root, i = 0; hdl != NULL; hdl = hdl->next, i++) {
+		qc_start_object(&jindent, i);
+		qc_print_attrs_json(hdl, jindent);
+		qc_end_object(&jindent, hdl->next == NULL);
+	}
+
+	printf("}\n");
+
+	return;
 }

@@ -1,0 +1,70 @@
+.\" Copyright IBM Corp. 2020
+.\" ----------------------------------------------------------------------
+
+.TH ZHYPINFO 8 "September 2020" "qclib" "System Administration Commands"
+
+.SH NAME
+zhypinfo \- Print information about virtualization layers on IBM Z.
+
+.SH SYNOPSIS
+
+.B zhypinfo [OPTION]
+
+.SH Description
+.B zhypinfo
+prints information about virtualization layers on IBM Z in a
+tabular format.
+.P
+.B Notes
+.IP \[bu] 2
+Not all information might be available, and unavailable
+data is indicated by a dash '-'.
+.IP \[bu]
+Some environments might map certain CPU types to CPUs of other
+types, including specialty engines.
+.IP \[bu]
+CPU Pools can define fractions of logical CPUs.
+
+
+.SH OUTPUT
+.SS "#"
+Index number of the respective layer.
+.SS "Layer_Type"
+Type of virtualization layer.
+.SS "Lvl"
+Virtualization level, where each layer of category 'HOST' constitutes a
+new level.
+.SS "Categ"
+Cathegory the virtualization layer belongs to.
+.SS "Name"
+Name of the respective entity.
+.SS "IFLs"
+Number of logical IFLs defined for the layer.
+.SS "CPs"
+Number of logical CPs defined for the layer.
+.SS "Total"
+Sum of logical CPUs in the layer.
+
+
+.SH OPTIONS
+.TP
+.BR "\-h, \-\-help"
+Print usage information and exit.
+.TP
+.BR "\-j, \-\-json"
+Dump all available data in JSON format. Known limitation: No character set
+conversion or proper escaping is performed.
+.TP
+.BR "\-l, \-\-layers"
+Print number of layers.
+.TP
+.BR "\-L, \-\-levels"
+Print number of virtualization levels.
+
+.SH RETURN CODES
+Successful \fBzhypinfo\fR commands return 0.
+If an error occurs, \fBzhypinfo\fR writes a message to stderr and
+completes with a return code other than 0.
+.P
+.SH SEE ALSO
+.BR zname (8)

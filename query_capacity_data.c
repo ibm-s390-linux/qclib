@@ -1,4 +1,4 @@
-/* Copyright IBM Corp. 2013, 2019 */
+/* Copyright IBM Corp. 2013, 2020 */
 
 #include "query_capacity_data.h"
 
@@ -1167,4 +1167,28 @@ char qc_get_attr_value_src_float(struct qc_handle *hdl, enum qc_attr_id id) {
 
 char qc_get_attr_value_src_string(struct qc_handle *hdl, enum qc_attr_id id) {
 	return qc_get_attr_value_src(hdl, id, string);
+}
+
+void qc_print_attrs_json(struct qc_handle *hdl, int indent) {
+        struct qc_attr *attr;
+        void *val;
+
+        for (attr = hdl->attr_list; attr->offset >= 0; attr++) {
+                if ((val = qc_get_attr_value(hdl, attr->id, attr->type)) == NULL)
+                        printf("%*s\"%s\": null", indent, "", qc_attr_id_to_char(hdl, attr->id));
+                else {
+                        switch (attr->type) {
+                        case integer:
+                                printf("%*s\"%s\": \"%d\"", indent, "", qc_attr_id_to_char(hdl, attr->id), *(int*)val);
+                                break;
+                        case floatingpoint:
+                                printf("%*s\"%s\": \"%f\"", indent, "", qc_attr_id_to_char(hdl, attr->id), *(float*)val);
+                                break;
+                        case string:
+                                printf("%*s\"%s\": \"%s\"", indent, "", qc_attr_id_to_char(hdl, attr->id), (char*)val);
+                                break;
+                        }
+                }
+                printf("%s\n", (attr + 1)->offset >= 0 ? "," : "");
+        }
 }
