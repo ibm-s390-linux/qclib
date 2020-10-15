@@ -349,21 +349,8 @@ static int qc_hdl_verify(struct qc_handle *hdl, const char *func) {
 
 // De-alloc hdl, leaving out the actual handle
 static void qc_hdl_reinit(struct qc_handle *hdl) {
-	struct qc_handle *ptr = hdl, *arg = hdl;
-
-	while (ptr) {
-		free(ptr->layer);
-		free(ptr->attr_present);
-		free(ptr->src);
-		hdl = ptr->next;
-		if (ptr == arg) {
-			memset(ptr, 0, sizeof(struct qc_handle));
-			ptr->root = ptr;
-		} else
-			free(ptr);
-		ptr = hdl;
-	}
-	qc_hdl_unregister(arg);
+	qc_hdl_prune(hdl);
+	qc_hdl_unregister(hdl);
 }
 
 /** Verifies that either a and (b or c), or none are set. I.e. if only one of the attributes is set, then that's an error */
@@ -709,9 +696,15 @@ out:
 }
 
 static int qc_post_processing(struct qc_handle *hdl) {
+	struct qc_handle *top_host = NULL;
+	int prune_to_host = 0;
+	char *s, *end;
+
 	qc_debug(hdl, "Post processing: Fill KVM layers\n");
 	qc_debug_indent_inc();
-	for (; hdl; hdl = hdl->next) {
+	for (hdl = qc_get_root_handle(hdl); hdl; hdl = hdl->next) {
+		if (((int *)(hdl->layer))[1] == QC_LAYER_CAT_HOST)
+			top_host = hdl;
 		switch(*(int *)(hdl->layer)) {
 		case QC_LAYER_TYPE_CEC:
 			if (qc_post_process_CEC(hdl))
@@ -731,6 +724,20 @@ static int qc_post_processing(struct qc_handle *hdl) {
 			break;
 		default:
 			break;
+		}
+	}
+
+	if ((s = getenv("QC_PRUNE_TO_HOST")) != NULL) {
+		prune_to_host = strtol(s, &end, 10);
+		if (end != s && prune_to_host != 0) {
+			// Suppress all layers on top of the topmost host above the LPAR layer
+			qc_debug(top_host, "QC_PRUNE_TO_HOST is set\n");
+			if (*(int *)(top_host->layer) != QC_LAYER_TYPE_CEC) {
+				qc_debug_indent_inc();
+				qc_debug(top_host, "Pruning layer %d and above\n", top_host->layer_no);
+				qc_hdl_prune(top_host->next);
+				qc_debug_indent_dec();
+			}
 		}
 	}
 	qc_debug_indent_dec();

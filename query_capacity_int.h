@@ -70,6 +70,8 @@ int qc_new_handle(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no
 int qc_insert_handle(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int type);
 // Insert new layer 'appended_hdl' of type 'type' after 'hdl'
 int qc_append_handle(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type);
+// Remove the layer pointed to by the handle and all layers on top
+void qc_hdl_prune(struct qc_handle *hdl);
 struct qc_handle *qc_get_cec_handle(struct qc_handle *hdl);
 struct qc_handle *qc_get_lpar_handle(struct qc_handle *hdl);
 struct qc_handle *qc_get_root_handle(struct qc_handle *hdl);

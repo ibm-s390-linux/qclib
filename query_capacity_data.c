@@ -890,6 +890,33 @@ int qc_insert_handle(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int
 	return 0;
 }
 
+void qc_hdl_prune(struct qc_handle *hdl) {
+        struct qc_handle *ptr = hdl, *skip = NULL;
+
+        // Pruning at the root needs special handling as does intermediate pruning
+        if (hdl == qc_get_root_handle(hdl))
+                skip = hdl;
+        else {
+                hdl = qc_get_prev_handle(hdl);
+                hdl->next = NULL;
+        }
+
+        while (ptr) {
+		free(ptr->layer);
+		free(ptr->attr_present);
+		free(ptr->src);
+		hdl = ptr->next;
+		if (ptr == skip) {
+			memset(ptr, 0, sizeof(struct qc_handle));
+			ptr->root = ptr;
+		} else
+			free(ptr);
+		ptr = hdl;
+	}
+
+	return;
+}
+
 int qc_append_handle(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type) {
 	struct qc_handle *next_hdl = hdl->next;
 
