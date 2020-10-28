@@ -1010,7 +1010,7 @@ static void print_help() {
 	printf("previously dumped data instead (but skipping a minor part of the self-test).\n");
 	printf("\n");
 	printf("  -h, --help       Print usage information and exit\n");
-	printf("  -q, --quiet      Quiet mode: Only gather system informtion; skip self-test and\n");
+	printf("  -q, --quiet      Quiet mode: Only gather system information; skip self-test and\n");
 	printf("                   suppress any output.\n");
 	printf("\n");
 }
