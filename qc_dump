@@ -1,32 +1,23 @@
 #!/bin/bash
 
-# Copyright IBM Corp. 2016, 2017
+# Copyright IBM Corp. 2016, 2020
 
-if [ $# -lt 1 ]; then
-	echo;
-	echo "Usage: qc_test <qc_test binary>";
-	echo;
-	echo "Creates a qclib dump enriched with add'l info";
-	echo;
-	echo "Note: Specification of qc_test binary is required to avoid usage of";
-        echo "      the wrong qc_test version in case there are multiple installed";
-	echo;
-	exit 1;
+qcbin="zname";
+if [ $# -eq 1 ]; then
+	qcbin="$1";
 fi
 
-# Let callers provide path to qc_test, since we might chose the wrong one
-qctest="$1";
-
-if [ ! -x $qctest ]; then
-	echo "Error: $qctest not found or not executable";
+if [ ! -x $qcbin ]; then
+	echo "Error: $qcbin not found or not executable";
+	echo "Note: You can specify an arbitrary executable as an argument to qc_dump";
 	exit 2;
 fi
 
-echo "Executing $qctest...";
-QC_DEBUG=2 $qctest >/tmp/ref_result.txt;
+echo "Executing $qcbin...";
+QC_DEBUG=2 $qcbin >/tmp/ref_result.txt;
 
 if [ $? -ne 0 ]; then
-	echo "$qctest failed - good thing we're creating a dump";
+	echo "$qcbin failed - good thing we're creating a dump";
 fi
 
 
