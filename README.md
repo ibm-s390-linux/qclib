@@ -89,6 +89,7 @@ Release History
 * __v2.2.x (tbd)__
 
     _Changes_:
+    - Only export symbols exposed in public header
 
     _Bug fixes_:
 

@@ -40,7 +40,7 @@ hcpinfbk_qclib.h: hcpinfbk.h
 	$(GEN) -ve "^#pragma " $< > $@	# strip off z/VM specific pragmas
 
 %.o: %.c query_capacity.h query_capacity_int.h query_capacity_data.h hcpinfbk_qclib.h
-	$(CC) $(CFLAGS) -fpic -c $< -o $@
+	$(CC) $(CFLAGS) -fpic -fvisibility=hidden -c $< -o $@
 
 libqc.a: $(OBJECTS)
 	$(AR) rcs $@ $^

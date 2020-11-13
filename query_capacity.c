@@ -819,7 +819,7 @@ out:
 	return hdl;
 }
 
-void *qc_open(int *rc) {
+__attribute__ ((visibility ("default"))) void *qc_open(int *rc) {
 	struct qc_handle *hdl = NULL;
 	char *s, *end;
 	int i;
@@ -876,7 +876,7 @@ out:
 	return hdl;
 }
 
-void qc_close(void *hdl) {
+__attribute__ ((visibility ("default"))) void qc_close(void *hdl) {
 	if (qc_hdl_verify(hdl, "qc_close"))
 		return;
 	qc_debug(hdl, "qc_close()\n");
@@ -889,7 +889,7 @@ void qc_close(void *hdl) {
 	qc_debug_indent_dec();
 }
 
-int qc_get_num_layers(void *cfg, int *rc) {
+__attribute__ ((visibility ("default"))) int qc_get_num_layers(void *cfg, int *rc) {
 	struct qc_handle *hdl = cfg;
 
 	if (qc_hdl_verify(hdl, "qc_get_num_layers")) {
@@ -923,7 +923,7 @@ static int qc_is_attr_id_valid(enum qc_attr_id id) {
 	return id <= qc_secure;
 }
 
-int qc_get_attribute_string(void *cfg, enum qc_attr_id id, int layer, const char **value) {
+__attribute__ ((visibility ("default"))) int qc_get_attribute_string(void *cfg, enum qc_attr_id id, int layer, const char **value) {
 	struct qc_handle *hdl;
 	int rc;
 
@@ -959,7 +959,7 @@ out:
 	return rc;
 }
 
-int qc_get_attribute_int(void *cfg, enum qc_attr_id id, int layer, int *value) {
+__attribute__ ((visibility ("default"))) int qc_get_attribute_int(void *cfg, enum qc_attr_id id, int layer, int *value) {
 	struct qc_handle *hdl;
 	void *ptr = NULL;
 	int rc;
@@ -1001,7 +1001,7 @@ out:
 }
 
 
-int qc_get_attribute_float(void *cfg, enum qc_attr_id id, int layer, float *value) {
+__attribute__ ((visibility ("default"))) int qc_get_attribute_float(void *cfg, enum qc_attr_id id, int layer, float *value) {
 	struct qc_handle *hdl;
 	void *ptr = NULL;
 	int rc;
@@ -1051,7 +1051,7 @@ static void qc_end_object(int *jindent, int final) {
 	printf("%*s}%s\n", *jindent, "", (final ? "" : ","));
 }
 
-void qc_export_json(void *cfg) {
+__attribute__ ((visibility ("default"))) void qc_export_json(void *cfg) {
 	struct qc_handle *hdl = (struct qc_handle *)cfg;
 	int jindent = 0;	// indent for json output
 	int i;
