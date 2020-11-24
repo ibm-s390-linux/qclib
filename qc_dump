@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Copyright IBM Corp. 2016, 2017
+
+if [ $# -lt 1 ]; then
+	echo;
+	echo "Usage: qc_test <qc_test binary>";
+	echo;
+	echo "Creates a qclib dump enriched with add'l info";
+	echo;
+	echo "Note: Specification of qc_test binary is required to avoid usage of";
+        echo "      the wrong qc_test version in case there are multiple installed";
+	echo;
+	exit 1;
+fi
+
+# Let callers provide path to qc_test, since we might chose the wrong one
+qctest="$1";
+
+if [ ! -x $qctest ]; then
+	echo "Error: $qctest not found or not executable";
+	exit 2;
+fi
+
+echo "Executing $qctest...";
+QC_DEBUG=2 $qctest >/tmp/ref_result.txt;
+
+if [ $? -ne 0 ]; then
+	echo "$qctest failed - good thing we're creating a dump";
+fi
+
+
+echo "Adding further content...";
+cd /tmp
+dump="`ls -rtd qclib-??????.dump-1 | tail -1`";
+mv ref_result.txt $dump;
+lscpu -e			> $dump/lscpu.output;
+hostname			> $dump/hostname.output;
+tgt=${dump%.*}.tgz;
+if [ -e /dev/vmcp ]; then
+	vmcp QUERY MULTITHREAD	> $dump/QUERY_MULTITHREAD.output;
+fi
+echo "Creating package...";
+tar cvfz $tgt $dump| sed -e 's/^/  /g';
+
+echo "Dump written to $PWD/$tgt";
+
+exit 0;
