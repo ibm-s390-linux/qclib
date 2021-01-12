@@ -90,6 +90,7 @@ Release History
 
     _Changes_:
     - Only export symbols exposed in public header
+    - `config.doxygen`: Remove obsolete variables
 
     _Bug fixes_:
 
