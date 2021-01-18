@@ -91,6 +91,7 @@ Release History
     _Changes_:
     - Only export symbols exposed in public header
     - `config.doxygen`: Remove obsolete variables
+    - `zname`, `zhypinfo`: Add version switch
 
     _Bug fixes_:
 

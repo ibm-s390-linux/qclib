@@ -55,8 +55,13 @@ static void print_help() {
 	printf("  -i, --cpuid          Print the CPU identifier\n");
 	printf("  -m, --model          Print model information\n");
 	printf("  -n, --name           Print the model name (default)\n");
-	printf("  -u, --manufacturer   Print manufacturer information\n");
+	printf("  -u, --manufacturer   Print the manufacturer\n");
+	printf("  -v, --version        Print version information\n");
 	printf("\n");
+}
+
+static void print_version() {
+	printf("zname utility, qclib-%s\n", QC_VERSION);
 }
 
 int main(int argc, char **argv) {
@@ -68,13 +73,14 @@ int main(int argc, char **argv) {
 		{ "manufacturer",	no_argument, NULL, 'u'},
 		{ "model",		no_argument, NULL, 'm'},
 		{ "name",		no_argument, NULL, 'n'},
+		{ "version",		no_argument, NULL, 'v'},
 		{ 0,			0,	     0,    0  }
 	};
 	int layers, i, type, opts = 0, rc = 0;
 	void *hdl = NULL;
 	int c;
 
-	while ((c = getopt_long(argc, argv, "acihumn", long_options, NULL)) != EOF) {
+	while ((c = getopt_long(argc, argv, "achimnuv", long_options, NULL)) != EOF) {
 		switch (c) {
 		case 'a': opts |= OPTS_ALL;
 			  break;
@@ -90,6 +96,8 @@ int main(int argc, char **argv) {
 			  break;
 	  	case 'u': opts |= OPTS_MANUFACTURER;
 	  	  	  break;
+		case 'v': print_version();
+			  return 0;
 		default:  print_help();
 			  return 1;
 		}

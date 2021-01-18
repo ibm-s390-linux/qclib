@@ -5,6 +5,8 @@
 #ifndef QUERY_CAPACITY
 #define QUERY_CAPACITY
 
+#define QC_VERSION	"2.2.99"
+
 
 /* Build Customization */
 #define CONFIG_DEBUG_TIMESTAMPS		// Print timestamps in log

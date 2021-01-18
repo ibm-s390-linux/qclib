@@ -172,19 +172,24 @@ static void print_help() {
 	printf("\n");
 }
 
+static void print_version() {
+	printf("zhypinfo utility, qclib-%s\n", QC_VERSION);
+}
+
 int main(int argc, char **argv) {
 	static struct option long_options[] = {
 		{ "help",		no_argument, NULL, 'h'},
 		{ "json",		no_argument, NULL, 'j'},
 		{ "layers",		no_argument, NULL, 'l'},
 		{ "levels",		no_argument, NULL, 'L'},
+		{ "version",            no_argument, NULL, 'v'},
 		{ 0,			0,	     0,    0  }
 	};
 	int layers, rc = 0, json = 0, lvls = 0, lays = 0;
 	void *hdl = NULL;
 	int c;
 
-	while ((c = getopt_long(argc, argv, "hjlL", long_options, NULL)) != EOF) {
+	while ((c = getopt_long(argc, argv, "hjlLv", long_options, NULL)) != EOF) {
 		switch (c) {
 		case 'h': print_help();
 			  return 0;
@@ -194,6 +199,8 @@ int main(int argc, char **argv) {
 			  break;
 		case 'L': lvls = 1;
 			  break;
+		case 'v': print_version();
+			  return 0;
 		default:  print_help();
 			  return 1;
 		}
