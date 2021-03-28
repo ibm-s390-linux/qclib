@@ -470,6 +470,8 @@ static struct qc_handle *qc_get_HV_layer(struct qc_handle *hdl, int num) {
 		     || type == QC_LAYER_TYPE_ZOS_HYPERVISOR) && ++i == num)
 			return hdl;
 	}
+	// Note: This can be triggered by a truncated /proc/sysinfo, see Linux kernel commit
+	//       0facaa170a6a0255092 "kernel: fix data corruption when reading /proc/sysinfo"
 	qc_debug(h, "Error: Couldn't find HV layer %d, only %d layer(s) found\n", num, i);
 
 	return NULL;
@@ -511,14 +513,17 @@ static int qc_sthyi_process(struct qc_handle *hdl, char *buf) {
 		goto out;
 	}
 	if (no_hyp_gst > 0) {
+		qc_debug(hdl, "Adding first HV/guest set\n");
 		hv[0] = (struct inf0hyp *)(sthyi_buffer + htobe16(header->infhoff1));
 		guest[0] = (struct inf0gst *)(sthyi_buffer + htobe16(header->infgoff1));
 	}
 	if (no_hyp_gst > 1) {
+		qc_debug(hdl, "Adding second HV/guest set\n");
 		hv[1] = (struct inf0hyp *)(sthyi_buffer + htobe16(header->infhoff2));
 		guest[1] = (struct inf0gst *)(sthyi_buffer + htobe16(header->infgoff2));
 	}
 	if (no_hyp_gst > 2) {
+		qc_debug(hdl, "Adding third HV/guest set\n");
 		hv[2] = (struct inf0hyp *)(sthyi_buffer + htobe16(header->infhoff3));
 		guest[2] = (struct inf0gst *)(sthyi_buffer + htobe16(header->infgoff3));
 	}
