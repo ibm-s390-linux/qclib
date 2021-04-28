@@ -86,14 +86,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Release History
 ---------------
-* __v2.2.x (tbd)__
+* __v2.3.0 (2021-04-28)__
 
     _Changes_:
     - Only export symbols exposed in public header
     - `config.doxygen`: Remove obsolete variables
     - `zname`, `zhypinfo`: Add version switch
-
-    _Bug fixes_:
 
 * __v2.2.1 (2020-10-14)__
 
