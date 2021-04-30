@@ -88,7 +88,7 @@ install: libqc.a libqc.so.$(VERSION) zhypinfo zname
 	install $(INSTFLAGS) -Dm 644 zname.8 $(DESTDIR)$(MANDIR)/man8/zname.8
 	install $(INSTFLAGS) -Dm 644 zhypinfo.8 $(DESTDIR)$(MANDIR)/man8/zhypinfo.8
 	install $(INSTFLAGS) -Dm 644 query_capacity.h $(DESTDIR)$(INCDIR)/query_capacity.h
-	install $(INSTFLAGS) -Dm 644 README $(DESTDIR)$(DOCDIR)/qclib/README
+	install $(INSTFLAGS) -Dm 644 README.md $(DESTDIR)$(DOCDIR)/qclib/README.md
 	install $(INSTFLAGS) -Dm 644 LICENSE $(DESTDIR)$(DOCDIR)/qclib/LICENSE
 
 installdoc: doc
