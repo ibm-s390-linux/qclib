@@ -86,6 +86,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Release History
 ---------------
+
+* __v2.3.x (tbd)__
+
+    _Changes_:
+    - Recognize IBM z16
+
+    _Bug fixes_:
+
 * __v2.3.0 (2021-04-28)__
 
     _Changes_:
