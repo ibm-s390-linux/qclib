@@ -354,6 +354,10 @@ static int qc_verify_capped_capacity(struct qc_handle *hdl, enum qc_attr_id a, e
 	if (!val_a && !val_b && !val_c)
 		return 0;
 
+	// Attributes should all be set now
+        if (!val_a || !val_b || !val_c)
+                return 1;
+
 	if ((*val_a && !*val_b && !*val_c) || (!*val_a && (*val_b || *val_c))) {
 		qc_debug(hdl, "Warning: Consistency check (\"capped capacity\") for '%s && (%s || %s)' failed at layer %d (%s/%s): %d && (%d || %d)\n",
 			qc_attr_id_to_char(hdl, a), qc_attr_id_to_char(hdl, b), qc_attr_id_to_char(hdl, c),
