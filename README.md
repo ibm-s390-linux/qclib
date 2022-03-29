@@ -90,6 +90,7 @@ Release History
 * __v2.3.99 (tbd)__
 
     _Changes_:
+    - Recognize IBM LinuxONE Emperor 4
 
     _Bug fixes_:
 
