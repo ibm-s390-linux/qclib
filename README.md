@@ -87,12 +87,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
-* __v2.3.99 (tbd)__
+* __v2.3.2 (2022-09-19)__
 
     _Changes_:
     - Recognize IBM LinuxONE Emperor 4
-
-    _Bug fixes_:
 
 * __v2.3.1 (2022-04-05)__
 
