@@ -523,39 +523,43 @@ static int qc_copy_attr_value_rename(struct qc_handle *tgt, enum qc_attr_id tgti
 
 struct qc_mtype {
 	int	type;
-	char   *zname;	// IBM Z
-	char   *lname;  // LinuxONE
+	char   *zname;		// IBM Z
+	char   *lname;		// LinuxONE
+	char   *zrack_type;	// IBM Z rack mount model type
+	char   *zrack_name;
+	char   *lrack_type;	// LinuxONE rack mount model type
+	char   *lrack_name;
 };
 
 static struct qc_mtype mtypes[] = {
 	//     IBM Z				LinuxONE
-	{4381, "IBM 4381",			NULL},
-	{3090, "IBM 3090",			NULL},
-	{9221, "IBM S/390 9221",		NULL},
-	{9021, "IBM ES/9000 9021",		NULL},
-	{2003, "IBM S/390 Multiprise 2000",	NULL},
-	{3000, "IBM S/390 StarterPak 3000",	NULL},
-	{9672, "IBM S/390 9672",		NULL},
-	{2066, "IBM zSeries 800",		NULL},
-	{2064, "IBM zSeries 900",		NULL},
-	{2086, "IBM zSeries 890",		NULL},
-	{2084, "IBM zSeries 990",		NULL},
-	{2096, "IBM System z9 BC",		NULL},
-	{2094, "IBM System z9 EC",		NULL},
-	{2098, "IBM System z10 BC",		NULL},
-	{2097, "IBM System z10 EC",		NULL},
-	{2818, "IBM zEnterprise 114",		NULL},
-	{2817, "IBM zEnterprise 196",		NULL},
-	{2827, "IBM zEnterprise EC12",		NULL},
-	{2828, "IBM zEnterprise BC12",		NULL},
-	{2965, "IBM z13s",			"IBM LinuxONE Rockhopper"},
-	{2964, "IBM z13",			"IBM LinuxONE Emperor"},
-	{3907, "IBM z14 ZR1",			"IBM LinuxONE Rockhopper II"},
-	{3906, "IBM z14",			"IBM LinuxONE Emperor II"},
-	{8561, "IBM z15",			"IBM LinuxONE III"},
-	{8562, "IBM z15 Model T02",		"IBM LinuxONE III Model LT2"},
-	{3931, "IBM z16",			"IBM LinuxONE Emperor 4"},
-	{0,    NULL,				NULL}
+	{4381, "IBM 4381",			NULL,				NULL, NULL, NULL, NULL},
+	{3090, "IBM 3090",			NULL,				NULL, NULL, NULL, NULL},
+	{9221, "IBM S/390 9221",		NULL,				NULL, NULL, NULL, NULL},
+	{9021, "IBM ES/9000 9021",		NULL,				NULL, NULL, NULL, NULL},
+	{2003, "IBM S/390 Multiprise 2000",	NULL,				NULL, NULL, NULL, NULL},
+	{3000, "IBM S/390 StarterPak 3000",	NULL,				NULL, NULL, NULL, NULL},
+	{9672, "IBM S/390 9672",		NULL,				NULL, NULL, NULL, NULL},
+	{2066, "IBM zSeries 800",		NULL,				NULL, NULL, NULL, NULL},
+	{2064, "IBM zSeries 900",		NULL,				NULL, NULL, NULL, NULL},
+	{2086, "IBM zSeries 890",		NULL,				NULL, NULL, NULL, NULL},
+	{2084, "IBM zSeries 990",		NULL,				NULL, NULL, NULL, NULL},
+	{2096, "IBM System z9 BC",		NULL,				NULL, NULL, NULL, NULL},
+	{2094, "IBM System z9 EC",		NULL,				NULL, NULL, NULL, NULL},
+	{2098, "IBM System z10 BC",		NULL,				NULL, NULL, NULL, NULL},
+	{2097, "IBM System z10 EC",		NULL,				NULL, NULL, NULL, NULL},
+	{2818, "IBM zEnterprise 114",		NULL,				NULL, NULL, NULL, NULL},
+	{2817, "IBM zEnterprise 196",		NULL,				NULL, NULL, NULL, NULL},
+	{2827, "IBM zEnterprise EC12",		NULL,				NULL, NULL, NULL, NULL},
+	{2828, "IBM zEnterprise BC12",		NULL,				NULL, NULL, NULL, NULL},
+	{2965, "IBM z13s",			"IBM LinuxONE Rockhopper",	NULL, NULL, NULL, NULL},
+	{2964, "IBM z13",			"IBM LinuxONE Emperor",		NULL, NULL, NULL, NULL},
+	{3907, "IBM z14 ZR1",			"IBM LinuxONE Rockhopper II",	NULL, NULL, NULL, NULL},
+	{3906, "IBM z14",			"IBM LinuxONE Emperor II",	NULL, NULL, NULL, NULL},
+	{8561, "IBM z15",			"IBM LinuxONE III",		NULL, NULL, NULL, NULL},
+	{8562, "IBM z15 Model T02",		"IBM LinuxONE III Model LT2",	NULL, NULL, NULL, NULL},
+	{3931, "IBM z16",			"IBM LinuxONE Emperor 4",	NULL, NULL, NULL, NULL},
+	{0,    NULL,				NULL,				NULL, NULL, NULL, NULL}
 };
 
 static int qc_post_process_ziip_thrds(struct qc_handle *hdl) {
@@ -582,12 +586,17 @@ static int qc_post_process_CEC(struct qc_handle *hdl) {
 	cpuid = atoi(str);
 	for (type = mtypes; type->type; ++type) {
 		if (cpuid == type->type) {
-			if (type->lname &&
-			    (str = qc_get_attr_value_string(hdl, qc_model)) != NULL &&
-			    *str == 'L') {
+			if ((str = qc_get_attr_value_string(hdl, qc_model)) == NULL)
+				goto out;
+			if (type->lname && *str == 'L') {
 				str = type->lname;
-				family = QC_TYPE_FAMILY_LINUXONE;
-			} else
+    				family = QC_TYPE_FAMILY_LINUXONE;
+			} else if (type->lrack_type && strncmp(str, type->lrack_type, 3) == 0) {
+				str = type->lrack_name;
+    				family = QC_TYPE_FAMILY_LINUXONE;
+			} else if (type->zrack_type && strncmp(str, type->zrack_type, 3) == 0)
+				str = type->zrack_name;
+			else
 				str = type->zname;
 			if (qc_set_attr_string(hdl, qc_type_name, str, ATTR_SRC_POSTPROC) ||
 			    qc_set_attr_int(hdl, qc_type_family, family, ATTR_SRC_POSTPROC))
