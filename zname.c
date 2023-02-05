@@ -53,6 +53,7 @@ static void print_help() {
 	printf("  -c, --capacity       Print capacity information\n");
 	printf("  -h, --help           Print usage information and exit\n");
 	printf("  -i, --cpuid          Print the CPU identifier\n");
+	printf("  -j, --json           Dump all available data in JSON format\n");
 	printf("  -m, --model          Print model information\n");
 	printf("  -n, --name           Print the model name (default)\n");
 	printf("  -u, --manufacturer   Print the manufacturer\n");
@@ -70,6 +71,7 @@ int main(int argc, char **argv) {
 		{ "capacity",		no_argument, NULL, 'c'},
 		{ "cpuid",		no_argument, NULL, 'i'},
 		{ "help",		no_argument, NULL, 'h'},
+		{ "json",               no_argument, NULL, 'j'},
 		{ "manufacturer",	no_argument, NULL, 'u'},
 		{ "model",		no_argument, NULL, 'm'},
 		{ "name",		no_argument, NULL, 'n'},
@@ -78,9 +80,9 @@ int main(int argc, char **argv) {
 	};
 	int layers, i, type, opts = 0, rc = 0;
 	void *hdl = NULL;
-	int c;
+	int c, json = 0;
 
-	while ((c = getopt_long(argc, argv, "achimnuv", long_options, NULL)) != EOF) {
+	while ((c = getopt_long(argc, argv, "achijmnuv", long_options, NULL)) != EOF) {
 		switch (c) {
 		case 'a': opts |= OPTS_ALL;
 			  break;
@@ -89,6 +91,8 @@ int main(int argc, char **argv) {
 	  	case 'h': print_help();
 	  		  return 0;
 		case 'i': opts |= OPTS_CPUID;
+			  break;
+		case 'j': json = 1;
 			  break;
 		case 'm': opts |= OPTS_MODEL;
 			  break;
@@ -102,11 +106,23 @@ int main(int argc, char **argv) {
 			  return 1;
 		}
 	}
-	if (!opts)
-		opts = OPTS_NAME;
+	if (json && opts) {
+		fprintf(stderr, "Error: Specifiy either one of the options to print info, or --json\n");
+			rc = 2;
+		goto out;
+	}
 
 	if ((rc = get_handle(&hdl, &layers)) != 0)
 		goto out;
+
+	if (json) {
+		qc_export_json(hdl);
+		rc = 0;
+		goto out;
+	}
+
+	if (!opts)
+		opts = OPTS_NAME;
 
 	for (i = 0; i < layers; i++) {
 		if (qc_get_attribute_int(hdl, qc_layer_type_num, i, &type) <= 0) {

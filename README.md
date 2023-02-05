@@ -90,6 +90,7 @@ Release History
 * __v2.3.99 (tbd)__
 
     _Changes_:
+    - `zname`: Add support for option `--json`
 
     _Bug fixes_:
 
