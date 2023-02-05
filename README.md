@@ -90,7 +90,9 @@ Release History
 * __v2.3.99 (tbd)__
 
     _Changes_:
+<<<<<<< HEAD
     - `zname`: Add support for option `--json`
+    - `qc_dump`: Add trace and JSON dump to `.tgz`
 
     _Bug fixes_:
 

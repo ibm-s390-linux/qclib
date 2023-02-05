@@ -5,16 +5,21 @@
 qcbin="zname";
 if [ $# -eq 1 ]; then
 	qcbin="$1";
-fi
-
-if [ ! -x $qcbin ]; then
-	echo "Error: $qcbin not found or not executable";
-	echo "Note: You can specify an arbitrary executable as an argument to qc_dump";
-	exit 2;
+	if [ ! -x $qcbin ]; then
+		echo "Error: $qcbin not found or not executable";
+		exit 1;
+	fi
+else
+	which $qcbin > /dev/null;
+	if [ $? -ne 0 ]; then
+		echo "Error: $qcbin not found or not executable";
+		echo "Note: You can specify an arbitrary executable as an argument to qc_dump";
+		exit 2;	
+	fi
 fi
 
 echo "Executing $qcbin...";
-QC_DEBUG=2 $qcbin >/tmp/ref_result.txt;
+QC_DEBUG=2 $qcbin --json >/tmp/ref_result.txt;
 
 if [ $? -ne 0 ]; then
 	echo "$qcbin failed - good thing we're creating a dump";
@@ -31,12 +36,13 @@ fi
 mv ref_result.txt $dump;
 lscpu -e			> $dump/lscpu.output;
 hostname			> $dump/hostname.output;
+cp `ls -rtd qclib-?????? | tail -1` $dump;
 tgt=${dump%.*}.tgz;
 if [ -e /dev/vmcp ]; then
 	vmcp QUERY MULTITHREAD	> $dump/QUERY_MULTITHREAD.output;
 fi
 echo "Creating package...";
-tar cvfz $tgt $dump| sed -e 's/^/  /g';
+tar cvfz $tgt $dump | sed -e 's/^/  /g';
 
 echo "Dump written to $PWD/$tgt";
 
