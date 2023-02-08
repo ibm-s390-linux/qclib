@@ -559,6 +559,7 @@ static struct qc_mtype mtypes[] = {
 	{8561, "IBM z15",			"IBM LinuxONE III",		NULL, NULL, NULL, NULL},
 	{8562, "IBM z15 Model T02",		"IBM LinuxONE III Model LT2",	NULL, NULL, NULL, NULL},
 	{3931, "IBM z16",			"IBM LinuxONE Emperor 4",	NULL, NULL, NULL, NULL},
+	{3932, "IBM z16 A02",			"IBM LinuxONE Rockhopper 4",	"AGZ", "IBM z16 AGZ", "AGL", "IBM LinuxONE Rockhopper 4"},
 	{0,    NULL,				NULL,				NULL, NULL, NULL, NULL}
 };
 
