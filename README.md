@@ -87,14 +87,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
-* __v2.3.99 (tbd)__
+* __v2.4.0 (2023-04-08)__
 
     _Changes_:
     - Recognize single frame models and rackable models
     - `zname`: Add support for option `--json`
     - `qc_dump`: Add trace and JSON dump to `.tgz`
-
-    _Bug fixes_:
 
 * __v2.3.2 (2022-09-19)__
 
