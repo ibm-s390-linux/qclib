@@ -92,6 +92,7 @@ Release History
     _Changes_:
 
     _Bug fixes_:
+    - Handle systems with `/sys/kernel/security/lockdown` enabled
 
 * __v2.4.0 (2023-04-08)__
 

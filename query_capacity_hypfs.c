@@ -617,7 +617,7 @@ static int qc_read_diag_file(struct qc_handle *hdl, const char *dbgfs, struct hy
 out_fail:
 	free(priv->data);
 	priv->data = NULL;
-	rc = -1;
+	rc = 1;
 out:
 	free(fpath);
 
@@ -942,14 +942,18 @@ static int qc_hypfs_open(struct qc_handle *hdl, char **buf) {
 				/* if z/VM diag file exists, the LPAR diag file's content
 				   isn't valid, so we're done after handling the z/VM file */
 				priv->diag = QC_HYPFS_ZVM;
-				if ((rc = qc_read_diag_file(hdl, dbgfs, priv)) != 0)
+				if ((rc = qc_read_diag_file(hdl, dbgfs, priv)) != 0) {
+					rc = 0; // not a fatal error - we just skip this source
 					goto out;
+				}
 				priv->avail = HYPFS_AVAIL_BIN_ZVM;
 			} else {
 				qc_debug(hdl, "No z/VM diag file found, must be an LPAR\n");
 				priv->diag = QC_HYPFS_LPAR;
-				if ((rc = qc_read_diag_file(hdl, dbgfs, priv)) != 0)
+				if ((rc = qc_read_diag_file(hdl, dbgfs, priv)) != 0) {
+					rc = 0; // not a fatal error - we just skip this source
 					goto out;
+				}
 				priv->avail = HYPFS_AVAIL_BIN_LPAR;
 			}
 		} else {
