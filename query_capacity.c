@@ -443,33 +443,34 @@ static int qc_consistency_check(struct qc_handle *hdl) {
 				goto out;
 			break;
 		case QC_LAYER_TYPE_LPAR:
-			if ((rc = qc_verify(hdl, qc_num_core_dedicated,  qc_num_core_shared,	ATTR_UNDEF,	     qc_num_core_total, 0)) ||
-			    (rc = qc_verify(hdl, qc_num_core_configured, qc_num_core_reserved,	qc_num_core_standby, qc_num_core_total, 0)) ||
-			    (rc = qc_verify(hdl, qc_num_cp_dedicated,	 qc_num_cp_shared,	ATTR_UNDEF,	     qc_num_cp_total,  1)) ||
-			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,   qc_num_ifl_shared,	ATTR_UNDEF,	     qc_num_ifl_total, 1)) ||
-			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,  qc_num_ziip_shared,	ATTR_UNDEF,	     qc_num_ziip_total, 1)))
+			if ((rc = qc_verify(hdl, qc_num_core_dedicated,  qc_num_core_shared,	qc_num_core_reserved,	qc_num_core_total, 0)) ||
+			    (rc = qc_verify(hdl, qc_num_core_configured, qc_num_core_standby,	qc_num_core_reserved,	qc_num_core_total, 0)) ||
+			    (rc = qc_verify(hdl, qc_num_cp_dedicated,	 qc_num_cp_shared,	ATTR_UNDEF,		qc_num_cp_total,  1)) ||
+			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,   qc_num_ifl_shared,	ATTR_UNDEF,		qc_num_ifl_total, 1)) ||
+			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,  qc_num_ziip_shared,	ATTR_UNDEF,		qc_num_ziip_total, 1)))
 				goto out;
 			break;
 		case QC_LAYER_TYPE_ZVM_HYPERVISOR:
-			if ((rc = qc_verify(hdl, qc_num_core_dedicated, qc_num_core_shared,	ATTR_UNDEF,		qc_num_core_total,	1)) ||
+			if ((rc = qc_verify(hdl, qc_num_core_dedicated, qc_num_core_shared,	qc_num_core_reserved,	qc_num_core_total,	1)) ||
 			    (rc = qc_verify(hdl, qc_num_cp_total,       qc_num_ifl_total,	ATTR_UNDEF,		qc_num_core_total,	1)) ||
 			    (rc = qc_verify(hdl, qc_num_cp_dedicated,   qc_num_ifl_dedicated,	ATTR_UNDEF,		qc_num_core_dedicated,	1)) ||
 			    (rc = qc_verify(hdl, qc_num_cp_shared,      qc_num_ifl_shared,	ATTR_UNDEF,		qc_num_core_shared,	1)) ||
-			    (rc = qc_verify(hdl, qc_num_cp_dedicated,   qc_num_cp_shared,	ATTR_UNDEF, qc_num_cp_total,	  1)) ||
-			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,  qc_num_ifl_shared,	ATTR_UNDEF, qc_num_ifl_total,	  1)) ||
-			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,	qc_num_ziip_shared,	ATTR_UNDEF, qc_num_ziip_total,	  1)))
+			    (rc = qc_verify(hdl, qc_num_cp_dedicated,   qc_num_cp_shared,	ATTR_UNDEF,		qc_num_cp_total,	  1)) ||
+			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,  qc_num_ifl_shared,	ATTR_UNDEF,		qc_num_ifl_total,	  1)) ||
+			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,	qc_num_ziip_shared,	ATTR_UNDEF,		qc_num_ziip_total,	  1)))
 				goto out;
 			break;
 		case QC_LAYER_TYPE_ZVM_CPU_POOL:
 		case QC_LAYER_TYPE_ZOS_TENANT_RESOURCE_GROUP:
-			if ((rc = qc_verify_capped_capacity(hdl, qc_cp_capped_capacity, qc_cp_capacity_cap, qc_cp_limithard_cap)) ||
-			    (rc = qc_verify_capped_capacity(hdl, qc_ifl_capped_capacity, qc_ifl_capacity_cap, qc_ifl_limithard_cap)) ||
-			    (rc = qc_verify_capped_capacity(hdl, qc_ziip_capped_capacity, qc_ziip_capacity_cap, qc_ziip_limithard_cap)))
+			if ((rc = qc_verify_capped_capacity(hdl,	qc_cp_capped_capacity,	qc_cp_capacity_cap,	qc_cp_limithard_cap)) ||
+			    (rc = qc_verify_capped_capacity(hdl,	qc_ifl_capped_capacity,	qc_ifl_capacity_cap,	qc_ifl_limithard_cap)) ||
+			    (rc = qc_verify_capped_capacity(hdl,	qc_ziip_capped_capacity, qc_ziip_capacity_cap,	qc_ziip_limithard_cap)))
 				goto out;
 			break;
 		case QC_LAYER_TYPE_ZVM_GUEST:
+			// Note: z/VM doesn't add qc_num_cpu_reserved when calculating qc_num_cpu_total
 			if ((rc = qc_verify(hdl, qc_num_cpu_dedicated,  qc_num_cpu_shared,	ATTR_UNDEF,		qc_num_cpu_total,	1)) ||
-			    (rc = qc_verify(hdl, qc_num_cpu_configured, qc_num_cpu_reserved,	qc_num_cpu_standby,	qc_num_cpu_total,	1)) ||
+			    (rc = qc_verify(hdl, qc_num_cpu_configured, qc_num_cpu_standby,	qc_num_cpu_reserved,	qc_num_cpu_total,	1)) ||
 			    (rc = qc_verify(hdl, qc_num_cp_total,       qc_num_ifl_total,	ATTR_UNDEF,		qc_num_cpu_total,	1)) ||
 			    (rc = qc_verify(hdl, qc_num_cp_dedicated,   qc_num_ifl_dedicated,	ATTR_UNDEF,		qc_num_cpu_dedicated,	1)) ||
 			    (rc = qc_verify(hdl, qc_num_cp_shared,      qc_num_ifl_shared,	ATTR_UNDEF,		qc_num_cpu_shared,	1)) ||
@@ -479,18 +480,18 @@ static int qc_consistency_check(struct qc_handle *hdl) {
 				goto out;
 			break;
 		case QC_LAYER_TYPE_KVM_HYPERVISOR:
-			if ((rc = qc_verify(hdl, qc_num_core_shared, 	qc_num_core_dedicated,	ATTR_UNDEF,	    qc_num_core_total, 1)) ||
-			(rc = qc_verify(hdl, qc_num_cp_dedicated,	qc_num_cp_shared,	ATTR_UNDEF,	    qc_num_cp_total, 1)) ||
-			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,	qc_num_ifl_shared,	ATTR_UNDEF,	    qc_num_ifl_total, 1)) ||
-			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,	qc_num_ziip_shared,	ATTR_UNDEF,	    qc_num_ziip_total, 1)))
+			if ((rc = qc_verify(hdl, qc_num_core_shared, 	qc_num_core_dedicated,	qc_num_core_reserved,	qc_num_core_total, 1)) ||
+			(rc = qc_verify(hdl, qc_num_cp_dedicated,	qc_num_cp_shared,	ATTR_UNDEF,		qc_num_cp_total, 1)) ||
+			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,	qc_num_ifl_shared,	ATTR_UNDEF,		qc_num_ifl_total, 1)) ||
+			    (rc = qc_verify(hdl, qc_num_ziip_dedicated,	qc_num_ziip_shared,	ATTR_UNDEF,		qc_num_ziip_total, 1)))
 				goto out;
 			break;
 		case QC_LAYER_TYPE_KVM_GUEST:
-			if ((rc = qc_verify(hdl, qc_num_cpu_configured, qc_num_cpu_reserved,	qc_num_cpu_standby, qc_num_cpu_total,	   1)) ||
-			    (rc = qc_verify(hdl, qc_num_cpu_shared, 	qc_num_cpu_dedicated,	ATTR_UNDEF,	    qc_num_cpu_total,	   1)) ||
-			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,	qc_num_ifl_shared,	ATTR_UNDEF,	    qc_num_ifl_total,	   1)) ||
-			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,	ATTR_UNDEF,		ATTR_UNDEF,	    0,			   1)) ||
-			    (rc = qc_verify(hdl, qc_num_ifl_shared,	ATTR_UNDEF,		ATTR_UNDEF,	    qc_num_cpu_configured, 1)))
+			if ((rc = qc_verify(hdl, qc_num_cpu_configured, qc_num_cpu_standby,	qc_num_cpu_reserved,	qc_num_cpu_total,	   1)) ||
+			    (rc = qc_verify(hdl, qc_num_cpu_shared, 	qc_num_cpu_dedicated,	qc_num_cpu_reserved,	qc_num_cpu_total,	   1)) ||
+			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,	qc_num_ifl_shared,	ATTR_UNDEF,		qc_num_ifl_total,	   1)) ||
+			    (rc = qc_verify(hdl, qc_num_ifl_dedicated,	ATTR_UNDEF,		ATTR_UNDEF,		0,			   1)) ||
+			    (rc = qc_verify(hdl, qc_num_ifl_shared,	ATTR_UNDEF,		ATTR_UNDEF,		qc_num_cpu_configured, 1)))
 				goto out;
 			break;
 		default: break;
