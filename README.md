@@ -94,6 +94,7 @@ Release History
     _Bug fixes_:
     - Handle systems with `/sys/kernel/security/lockdown` enabled
     - Consistency check: Fix accounting of reserved cores and CPUs
+    - Trace: Fix display of version information
 
 * __v2.4.0 (2023-04-08)__
 
