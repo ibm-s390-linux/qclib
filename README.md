@@ -87,9 +87,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
-* __v2.4.99 (tbd)__
-
-    _Changes_:
+* __v2.4.1 (2023-12-17)__
 
     _Bug fixes_:
     - Handle systems with `/sys/kernel/security/lockdown` enabled
