@@ -90,6 +90,8 @@ Release History
 * __v2.4.99 (tbd)__
 
     _Changes_:
+    - `zname`, `zhypinfo`: Add command line switch `-d`
+    - Removed now unused compile option `CONFIG_DEBUG_TIMESTAMPS`
 
     _Bug fixes_:
 

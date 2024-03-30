@@ -85,24 +85,24 @@ extern FILE *qc_dbg_file;
 extern char *qc_dbg_dump_dir;
 extern char *qc_dbg_use_dump;
 extern int   qc_dbg_indent;
+extern int   qc_dbg_console;
 extern int   qc_consistency_check_requested;
 void qc_debug_indent_inc();
 void qc_debug_indent_dec();
 void qc_mark_dump_incomplete(struct qc_handle *hdl, char *missing_component);
 
 
-#ifdef CONFIG_DEBUG_TIMESTAMPS
-#define qc_debug(hdl, arg, ...)	do {if (qc_dbg_level > 0) { \
-					time_t t; \
-					struct tm *tm; \
-					time(&t); \
-					tm = localtime(&t); \
-					fprintf(qc_dbg_file, "%02d/%02d,%02d:%02d:%02d,%-10p: %*s" arg, \
-					tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, qc_hdl_get_root(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
-				} }while(0);
-#else
-#define qc_debug(hdl, arg, ...)	do {if (qc_dbg_level > 0) { \
-					fprintf(qc_dbg_file, "%-10p: %*s" arg, qc_hdl_get_root(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
-				} } while(0);
-#endif
+#define qc_debug(hdl, arg, ...)	do { \
+	if (qc_dbg_level > 0) { \
+		if (qc_dbg_console) { \
+			fprintf(stderr, "%*s" arg, qc_dbg_indent, "", ##__VA_ARGS__); \
+		} else { \
+			time_t t; \
+			struct tm *tm; \
+			time(&t); \
+			tm = localtime(&t); \
+			fprintf(qc_dbg_file, "%02d/%02d,%02d:%02d:%02d,%-10p: %*s" arg, \
+			tm->tm_mon + 1, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, qc_hdl_get_root(hdl), qc_dbg_indent, "", ##__VA_ARGS__); \
+		} \
+	} }while(0);
 #endif

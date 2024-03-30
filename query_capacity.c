@@ -12,6 +12,7 @@ FILE *qc_dbg_file;
 char *qc_dbg_dump_dir;
 int   qc_dbg_indent;
 char *qc_dbg_use_dump;
+int   qc_dbg_console;
 int   qc_consistency_check_requested;
 static char	    *qc_dbg_file_name;
 static long	     qc_dbg_autodump;
@@ -53,6 +54,12 @@ static void qc_update_dbg_level(void) {
 		qc_dbg_autodump = strtol(s, &end, 10);
 		if (end == s || qc_dbg_autodump < 0)
 			qc_dbg_autodump = 0;
+	}
+	s = getenv("QC_DEBUG_CONSOLE");
+	if (s) {
+		qc_dbg_console = strtol(s, &end, 10);
+		if (end == s || qc_dbg_console < 0)
+			qc_dbg_console = 0;
 	}
 }
 
@@ -171,6 +178,7 @@ static int qc_debug_init(void) {
 		qc_dbg_use_dump = NULL;
 		qc_dbg_dump_idx = 0;
 		qc_dbg_autodump = 0;
+		qc_dbg_console = 0;
 		init = 1;
 	}
 	qc_update_dbg_level();

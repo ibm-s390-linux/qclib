@@ -9,7 +9,6 @@
 
 
 /* Build Customization */
-#define CONFIG_DEBUG_TIMESTAMPS		// Print timestamps in log
 //#define CONFIG_DUMP_READING		// Allow to read in dumps
 //#define CONFIG_V1_COMPATIBILITY	// Support functionality deprecated in v1.x
 //#define CONFIG_TEXTUAL_HYPFS		// Use data from textual hypfs if available

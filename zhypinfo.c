@@ -165,6 +165,7 @@ static void print_help() {
 	printf("\n");
 	printf("Print information about virtualization layers on IBM Z.\n");
 	printf("\n");
+	printf("  -d, --debug          Increase debug level\n");
 	printf("  -h, --help           Print usage information and exit\n");
 	printf("  -j, --json           Dump all available data in JSON format\n");
 	printf("  -l, --layers         Print layer count\n");
@@ -178,6 +179,7 @@ static void print_version() {
 
 int main(int argc, char **argv) {
 	static struct option long_options[] = {
+		{ "debug",              no_argument, NULL, 'd'},
 		{ "help",		no_argument, NULL, 'h'},
 		{ "json",		no_argument, NULL, 'j'},
 		{ "layers",		no_argument, NULL, 'l'},
@@ -185,12 +187,16 @@ int main(int argc, char **argv) {
 		{ "version",            no_argument, NULL, 'v'},
 		{ 0,			0,	     0,    0  }
 	};
-	int layers, rc = 0, json = 0, lvls = 0, lays = 0;
+	int layers, rc = 0, json = 0, lvls = 0, lays = 0, dbg = 0;
 	void *hdl = NULL;
 	int c;
 
-	while ((c = getopt_long(argc, argv, "hjlLv", long_options, NULL)) != EOF) {
+	setenv("QC_DEBUG_CONSOLE", "1", 1);
+
+	while ((c = getopt_long(argc, argv, "dhjlLv", long_options, NULL)) != EOF) {
 		switch (c) {
+		case 'd': dbg++;
+			  break;
 		case 'h': print_help();
 			  return 0;
 		case 'j': json = 1;
@@ -205,7 +211,10 @@ int main(int argc, char **argv) {
 			  return 1;
 		}
 	}
-
+	if (dbg == 1)
+		setenv("QC_DEBUG", "1", 1);
+	if (dbg > 1)
+		setenv("QC_DEBUG", "2", 1);
 	if ((rc = get_handle(&hdl, &layers)) != 0)
 		goto out;
 	if (json + lays + lvls > 1) {

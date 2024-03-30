@@ -51,6 +51,7 @@ static void print_help() {
 	printf("\n");
 	printf("  -a, --all            Print all available information\n");
 	printf("  -c, --capacity       Print capacity information\n");
+	printf("  -d, --debug          Increase debug level\n");
 	printf("  -h, --help           Print usage information and exit\n");
 	printf("  -i, --cpuid          Print the CPU identifier\n");
 	printf("  -j, --json           Dump all available data in JSON format\n");
@@ -69,6 +70,7 @@ int main(int argc, char **argv) {
 	static struct option long_options[] = {
 		{ "all",		no_argument, NULL, 'a'},
 		{ "capacity",		no_argument, NULL, 'c'},
+		{ "debug",		no_argument, NULL, 'd'},
 		{ "cpuid",		no_argument, NULL, 'i'},
 		{ "help",		no_argument, NULL, 'h'},
 		{ "json",               no_argument, NULL, 'j'},
@@ -78,16 +80,20 @@ int main(int argc, char **argv) {
 		{ "version",		no_argument, NULL, 'v'},
 		{ 0,			0,	     0,    0  }
 	};
-	int layers, i, type, opts = 0, rc = 0;
+	int layers, i, type, opts = 0, rc = 0, dbg = 0;
 	void *hdl = NULL;
 	int c, json = 0;
 
-	while ((c = getopt_long(argc, argv, "achijmnuv", long_options, NULL)) != EOF) {
+	setenv("QC_DEBUG_CONSOLE", "1", 1);
+
+	while ((c = getopt_long(argc, argv, "acdhijmnuv", long_options, NULL)) != EOF) {
 		switch (c) {
 		case 'a': opts |= OPTS_ALL;
 			  break;
 		case 'c': opts |= OPTS_CAPACITY;
 	  		  break;
+		case 'd': dbg++;
+			  break;
 	  	case 'h': print_help();
 	  		  return 0;
 		case 'i': opts |= OPTS_CPUID;
@@ -106,6 +112,10 @@ int main(int argc, char **argv) {
 			  return 1;
 		}
 	}
+	if (dbg == 1)
+		setenv("QC_DEBUG", "1", 1);
+	if (dbg > 1)
+		setenv("QC_DEBUG", "2", 1);
 	if (json && opts) {
 		fprintf(stderr, "Error: Specifiy either one of the options to print info, or --json\n");
 			rc = 2;
