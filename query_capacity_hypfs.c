@@ -25,10 +25,6 @@
 #define QC_CPU_CAPPED		0x40
 
 #define HYPFS_NA		0
-#ifdef CONFIG_TEXTUAL_HYPFS
-#define HYPFS_AVAIL_ASCII_LPAR	1
-#define HYPFS_AVAIL_ASCII_ZVM	2
-#endif
 #define HYPFS_AVAIL_BIN_LPAR	3
 #define HYPFS_AVAIL_BIN_ZVM	4
 
@@ -124,42 +120,6 @@ static char *qc_get_path(struct qc_handle *hdl, const char *dbgfs, const char *f
 	return buf;
 }
 
-#ifdef CONFIG_TEXTUAL_HYPFS
-static void qc_dump_hypfs(struct qc_handle *hdl, char *hypfs) {
-	char *cmd;
-	int rc;
-
-	qc_debug_indent_inc();
-	/* dumping textual hypfs this way and a lot later than the actual parse can give
-	   us different data from what we parsed before - but that is the best that we can do */
-	if (!hypfs) {
-		qc_debug(hdl, "Error: Failed to dump textual hypfs as hypfs==NULL\n");
-		qc_mark_dump_incomplete(hdl, "hypfs textual");
-		qc_debug_indent_dec();
-		return;
-	}
-	/* We read all files individually during regular processing, so we can do now is to
-	   copy the content with 'cp -r' */
-	if (asprintf(&cmd, "/bin/cp -r %s/hyp %s/cpus %s/systems %s > /dev/null 2>&1",
-						hypfs, hypfs, hypfs, qc_dbg_dump_dir) == -1) {
-		qc_debug(hdl, "Error: Mem alloc failure, cannot dump textual hypfs\n");
-		qc_mark_dump_incomplete(hdl, "hypfs textual");
-		qc_debug_indent_dec();
-		return;
-	}
-	if ((rc = system(cmd)) == 0) {
-		qc_debug(hdl, "hypfs (textual) dumped to '%s'\n", qc_dbg_dump_dir);
-	} else {
-		qc_debug(hdl, "Error: Failed to dump textual hypfs with command '%s', rc=%d\n", cmd, rc);
-		qc_mark_dump_incomplete(hdl, "hypfs textual");
-	}
-	free(cmd);
-	qc_debug_indent_dec();
-
-	return;
-}
-#endif
-
 static void qc_dump_hypfs_bin(struct qc_handle *hdl, const char *diag, __u8 *data, ssize_t len) {
 	char *fname = NULL, *cmd;
 	int fd, rc, success = 0;
@@ -230,12 +190,6 @@ static void qc_hypfs_dump(struct qc_handle *hdl, char *buf) {
 	if (!priv)
 		goto out;
 	switch(priv->avail) {
-#ifdef CONFIG_TEXTUAL_HYPFS
-	case HYPFS_AVAIL_ASCII_LPAR:
-	case HYPFS_AVAIL_ASCII_ZVM:
-		qc_dump_hypfs(hdl, priv->hypfs);
-		break;
-#endif
 	case HYPFS_AVAIL_BIN_LPAR:
 	case HYPFS_AVAIL_BIN_ZVM:
 		qc_dump_hypfs_bin(hdl, priv->diag, (__u8 *)priv->data, priv->len);
@@ -250,118 +204,6 @@ out:
 
 	return;
 }
-
-#ifdef CONFIG_TEXTUAL_HYPFS
-// path must be hypfs path ending with '.../cpus'
-static int qc_get_hypfs_cpu_types(struct qc_handle *hdl, const char *path,
-				  int *ifl_total, int *cp_total) {
-	char str_buf[STR_BUF_SIZE];
-	struct dirent **namelist;
-	int n, no_files, un_total = 0, rc = 0;
-	FILE *file;
-	char *tmp;
-
-	*ifl_total = *cp_total = 0;
-	no_files = scandir(path, &namelist, NULL, alphasort);
-	for (n = 0; n < no_files; n++) {
-		if (*namelist[n]->d_name == '.')
-			// skip '.' and '..' to avoid false positives
-			continue;
-		if (asprintf(&tmp, "%s/%s/type", path, namelist[n]->d_name) == -1) {
-			qc_debug(hdl, "Error: Couldn't allocate buffer for hypfs type path\n");
-			rc = -1;
-			goto out;
-		}
-		file = fopen(tmp, "r");
-		if (!file) {
-			free(tmp);
-			continue;
-		}
-		qc_debug(hdl, "Parsing file %s\n", tmp);
-		free(tmp);
-		memset(str_buf, 0, STR_BUF_SIZE);
-		if (fread(str_buf, 1, STR_BUF_SIZE, file) > 0) {
-			if (!strncmp("CP", str_buf, strlen("CP")))
-				(*cp_total)++;
-			else if (!strncmp("IFL", str_buf, strlen("IFL")))
-				(*ifl_total)++;
-			else
-				un_total++;
-		}
-		fclose(file);
-	}
-	qc_debug(hdl, "Found %d cpus total (%d CP, %d IFL, %d UN)\n", *cp_total + *ifl_total + un_total,
-									*cp_total, *ifl_total, un_total);
-
-out:
-	for (n = 0; n < no_files; n++)
-		free(namelist[n]);
-	if (no_files > 0)
-		free(namelist);
-
-	return rc;
-}
-
-static int qc_fill_in_hypfs_lpar_values(struct qc_handle *hdl, const char *hypfs) {
-	int num_ifl = 0, num_cp = 0;
-	char *fpath = NULL;
-	const char *s;
-	int rc = -1;
-
-	qc_debug(hdl, "Add LPAR values from textual hypfs API\n");
-	qc_debug_indent_inc();
-	hdl = qc_get_lpar(hdl);
-	if ((s = qc_get_attr_value_string(hdl, qc_layer_name)) == NULL) {
-		rc = -1;
-		goto out;
-	}
-	if (asprintf(&fpath, "%s/systems/%s/cpus", hypfs, s) == -1) {
-		qc_debug(hdl, "Error: Couldn't allocate buffer for hypfs systems path\n");
-		goto out;
-	}
-	rc = qc_get_hypfs_cpu_types(hdl, fpath, &num_ifl, &num_cp);
-	free(fpath);
-	if (rc)
-		goto out;
-
-	if (qc_set_attr_int(hdl, qc_num_cp_total, num_cp, ATTR_SRC_HYPFS) ||
-	    qc_set_attr_int(hdl, qc_num_ifl_total, num_ifl, ATTR_SRC_HYPFS))
-		goto out;
-	rc = 0;
-
-out:
-	qc_debug_indent_dec();
-
-	return rc;
-}
-
-static int qc_fill_in_hypfs_cec_values(struct qc_handle *hdl, const char *hypfs) {
-	int num_ifl = 0, num_cp = 0;
-	char *fpath = NULL;
-	int rc = -1;
-
-	qc_debug(hdl, "Add CEC values from textual hypfs API\n");
-	qc_debug_indent_inc();
-	if (asprintf(&fpath, "%s/cpus", hypfs) == -1) {
-		qc_debug(hdl, "Error: Couldn't allocate buffer for hypfs systems path\n");
-		goto out;
-	}
-	rc = qc_get_hypfs_cpu_types(hdl, fpath, &num_ifl, &num_cp);
-	free(fpath);
-	if (rc)
-		goto out;
-
-	if (qc_set_attr_int(hdl, qc_num_cp_total, num_cp, ATTR_SRC_HYPFS) ||
-	    qc_set_attr_int(hdl, qc_num_ifl_total, num_ifl, ATTR_SRC_HYPFS))
-		goto out;
-	rc = 0;
-
-out:
-	qc_debug_indent_dec();
-
-	return rc;
-}
-#endif
 
 static int qc_fill_in_hypfs_lpar_values_bin(struct qc_handle *hdl, __u8 *data) {
 	int ziip = 0, ziip_ded = 0, ziip_cap = 0, ziip_weight = 0, ziip_abs_cap = 0, ziip_all_weight = 0, ziip_w, *ziip_sh;
@@ -551,24 +393,6 @@ out:
 	return rc;
 }
 
-#ifdef CONFIG_TEXTUAL_HYPFS
-static int qc_read_file(struct qc_handle *hdl, const char *fpath, char *buf, int buflen) {
-	FILE *file;
-	int rc = 0;
-
-	qc_debug(hdl, "Read file %s\n", fpath);
-	file = fopen(fpath, "r");
-	if (file) {
-		memset(buf, 0, buflen);
-		rc = fread(buf, 1, buflen, file);
-		fclose(file);
-	} else
-		qc_debug(hdl, "Could not open file %s: %s\n", fpath, strerror(errno));
-
-	return rc;
-}
-#endif
-
 static int qc_read_diag_file(struct qc_handle *hdl, const char *dbgfs, struct hypfs_priv *priv) {
 	long buflen = sizeof(struct dfs_diag_hdr);
 	struct dfs_diag_hdr *hdr;
@@ -648,82 +472,6 @@ static struct qc_handle *qc_get_zvm_hdl(struct qc_handle *hdl, const char **s) {
 
 	return hdl;
 }
-
-#ifdef CONFIG_TEXTUAL_HYPFS
-static int qc_fill_in_hypfs_zvm_values(struct qc_handle *hdl, const char *hypfs) {
-	int fplen, cpu_count = 0, cap_num, rc = 0;
-	char str_buf[STR_BUF_SIZE], *fpath = NULL, *cap = NULL;
-	int dedicated = -1; /* can be 0 or 1, if set; remains -1, if not set */
-	const char *s;
-
-	qc_debug(hdl, "Add z/VM values from textual hypfs API\n");
-	qc_debug_indent_inc();
-	if ((hdl = qc_get_zvm_hdl(hdl, &s)) == NULL) {
-		rc = -1;
-		goto out;
-	}
-	fplen = strlen(hypfs) + strlen("/systems/") + strlen(s)	+ strlen("/cpus/");
-	fpath = malloc(fplen + strlen("dedicated") + 1);  // longest string possible
-	if (!fpath) {
-		qc_debug(hdl, "Error: Could not allocate systems path\n");
-		rc = -2;
-		goto out;
-	}
-
-	/* read capping off/soft/hard */
-	sprintf(fpath, "%s/systems/%s/cpus/capped", hypfs, s);	// fill string 1st time only,
-					// overwrite filename in all successive occasions
-	if (qc_read_file(hdl, fpath, str_buf, STR_BUF_SIZE)) {
-		if (!strncmp("1", str_buf, 1)) {
-			cap_num = QC_CAPPING_SOFT;
-			cap = "soft";
-		} else if (!strncmp("2", str_buf, 1)) {
-			cap_num = QC_CAPPING_HARD;
-			cap = "hard";
-		} else {
-			cap_num = QC_CAPPING_OFF;
-			cap = "off";
-		}
-		if (qc_set_attr_int(hdl, qc_capping_num, cap_num, ATTR_SRC_HYPFS) ||
-		    qc_set_attr_string(hdl, qc_capping, cap, ATTR_SRC_HYPFS)) {
-			rc = -3;
-			goto out;
-		}
-	}
-
-	/* if guest dedicated, all cpus are dedicated, update sums */
-	strcpy(fpath + fplen, "dedicated");
-	if (qc_read_file(hdl, fpath, str_buf, STR_BUF_SIZE)) {
-		if (!strncmp("0", str_buf, 1))
-			dedicated = 0;
-		else if (!strncmp("1", str_buf, 1))
-			dedicated = 1;
-	}
-
-	strcpy(fpath + fplen, "count");
-	if (qc_read_file(hdl, fpath, str_buf, STR_BUF_SIZE) && sscanf(str_buf, "%i", &cpu_count) <= 0)
-		cpu_count = 0;
-
-	qc_debug(hdl, "Raw data: %d cpus, dedicated=%u, capped=%s\n", cpu_count, dedicated, cap);
-	if (cpu_count) {
-		/* the dedicated flag tells us, if the guest has got at least one dedicated CPU.
-		 * That means, we can only derive information, if no CPU is dedicated (i.e. all shared) */
-		if (dedicated == 0) { /* dedicated flag present and not set */
-			if (qc_set_attr_int(hdl, qc_num_cpu_shared, cpu_count, ATTR_SRC_HYPFS) ||
-			    qc_set_attr_int(hdl, qc_num_cpu_dedicated, 0, ATTR_SRC_HYPFS)) {
-				rc = -4;
-				goto out;
-			}
-		}
-	}
-
-out:
-	free(fpath);
-	qc_debug_indent_dec();
-
-	return rc;
-}
-#endif
 
 // Returns diag data for highest layer z/VM instance in var 'data', with pointer to entire data
 // stored in 'buf' (must be free()'d), and updates hdl to point to respective handle.
@@ -856,55 +604,6 @@ static int qc_get_mountpoint(struct qc_handle *hdl, char *fstype, char **mp) {
 	return 0;
 }
 
-#ifdef CONFIG_TEXTUAL_HYPFS
-static int qc_update_hypfs(struct qc_handle *hdl, const char *upath) {
-	FILE *file;
-	size_t rc;
-
-	qc_debug(hdl, "Update hypfs using %s\n", upath);
-	file = fopen(upath, "w");
-	if (!file) {
-		/* Don't treat as an error in case hypfs is mounted but not accessible.
-		   But we assume the remainder of hypfs won't be accessible either, so out we go. */
-		qc_debug(hdl, "Warning: Failed to open '%s': %s\n", upath, strerror(errno));
-		return 1;
-	}
-	rc = fwrite("1\n", 1, strlen("1\n"), file);
-	fclose(file);
-	if (rc < strlen("1\n")) {
-		// Could be file access rights preventing us from a proper update
-		qc_debug(hdl, "Warning: Failed to write to '%s', rc=%zd\n", upath, rc);
-		return 2;
-	}
-
-	return 0;
-}
-
-static int qc_get_update_mod_time(struct qc_handle *hdl, const char *hypfs, time_t *mtime) {
-	char *fpath = NULL;
-	struct stat buf;
-
-	if (qc_dbg_use_dump) {
-		*mtime = 37;
-		return 0;
-	}
-
-	qc_debug(hdl, "Retrieve mod time of %s/update\n", hypfs);
-	if ((fpath = qc_get_path(hdl, hypfs, "/update")) == NULL)
-		return -1;
-	if (stat(fpath, &buf)) {
-		qc_debug(hdl, "Error: Couldn't stat '%s'\n", fpath);
-		free(fpath);
-		return -2;
-	}
-	free(fpath);
-	*mtime = buf.st_mtime;
-	qc_debug(hdl, "Mod time: %ld\n", *mtime);
-
-	return 0;
-}
-#endif
-
 static int qc_hypfs_open(struct qc_handle *hdl, char **buf) {
 	char *dbgfs = NULL, *fpath = NULL;
 	struct hypfs_priv *priv;
@@ -982,13 +681,6 @@ static void qc_hypfs_close(struct qc_handle *hdl, char *buf) {
 
 static int qc_hypfs_process(struct qc_handle *hdl, char *buf) {
 	struct hypfs_priv *priv = (struct hypfs_priv *)buf;
-#ifdef CONFIG_TEXTUAL_HYPFS
-	char str_buf[STR_BUF_SIZE] = "";
-	time_t mtime, mtime_old;
-	char *fpath = NULL;
-	FILE *file = NULL;
-	int i;
-#endif
 	int rc = 0;
 
 	qc_debug(hdl, "Process hypfs\n");
@@ -1007,91 +699,7 @@ static int qc_hypfs_process(struct qc_handle *hdl, char *buf) {
 		goto out;
 	}
 
-#ifdef CONFIG_TEXTUAL_HYPFS
-	/* fallback to textual interface */
-	qc_debug(hdl, "Use textual hypfs API\n");
-	rc = qc_get_mountpoint(hdl, "s390_hypfs", &priv->hypfs);
-	if (rc < 0)
-		goto out;
-	if (rc > 0) {
-		rc = 0;		// don't treat non-presence of hypfs as an error
-		qc_debug(hdl, "hypfs info not available\n");
-		goto out;
-	}
-	if ((fpath = qc_get_path(hdl, priv->hypfs, "/update")) == NULL)
-		goto mem_err;
-	rc = qc_update_hypfs(hdl, fpath);
-	if (rc < 0)
-		goto out;
-	if (rc > 0) {
-		qc_debug(hdl, "hypfs info not available\n");
-		rc = 0;		// don't treat as an error
-		goto out;
-	}
-	free(fpath);
-	fpath = NULL;
-
-	/* If we can't get it right within 3 tries, we give up */
-	for(i = 0; i < 3; ++i) {
-		if (qc_get_update_mod_time(hdl, priv->hypfs, &mtime_old)) {
-			rc = -2;
-			goto out;
-		}
-
-		memset(str_buf, 0, STR_BUF_SIZE);
-		if ((fpath = qc_get_path(hdl, priv->hypfs, "/hyp/type")) == NULL)
-			goto mem_err;
-		if (!qc_read_file(hdl, fpath, str_buf, STR_BUF_SIZE)) {
-			qc_debug(hdl, "Error: Failed to open or read '%s'\n", fpath);
-			rc = -4;
-			goto out;
-		}
-
-		if (!strncmp(str_buf, "LPAR Hypervisor", strlen("LPAR Hypervisor"))) {
-			if (qc_fill_in_hypfs_cec_values(hdl->root, priv->hypfs) ||
-			    qc_fill_in_hypfs_lpar_values(hdl, priv->hypfs)) {
-				rc = -6;
-				goto out;
-			}
-			priv->avail = HYPFS_AVAIL_ASCII_LPAR;
-		} else if (!strncmp("z/VM Hypervisor", str_buf, strlen("z/VM Hypervisor"))) {
-			if (qc_fill_in_hypfs_zvm_values(hdl, priv->hypfs)) {
-				rc = -7;
-				goto out;
-			}
-			priv->avail = HYPFS_AVAIL_ASCII_ZVM;
-		} else {
-			qc_debug(hdl, "Error: Unhandled hypervisor '%s', ignored\n", str_buf);
-			rc = 0;
-			goto out;
-		}
-
-		if (qc_get_update_mod_time(hdl, priv->hypfs, &mtime)) {
-			rc = -8;
-			goto out;
-		}
-		if (mtime == mtime_old)
-			goto out;
-	}
-
-	/* Ideally we'd clear any data possibly collected in an invalid attempt
-	   (mod_time != buf.st_mtime). However, that's complicated, as we'd have to
-	   revert to previously filled in values from other sources - which we
-	   currently can't */
-	qc_debug(hdl, "Error: Failed to get consistent data from hypfs\n");
-	rc = -9;
-	goto out;
-
-mem_err:
-	qc_debug(hdl, "Error: Memory allocation error\n");
-	rc = -10;
-#endif
 out:
-#ifdef CONFIG_TEXTUAL_HYPFS
-	free(fpath);
-	if (file)
-		fclose(file);
-#endif
 	qc_debug_indent_dec();
 
 	return rc;

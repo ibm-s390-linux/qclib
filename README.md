@@ -90,6 +90,7 @@ Release History
 * __v2.4.99 (tbd)__
 
     _Changes_:
+    - Remove support for textual hypfs, as previously indicated with v1.4.0
     - `zname`, `zhypinfo`: Add command line switch `-d`
     - Removed now unused compile option `CONFIG_DEBUG_TIMESTAMPS`
 

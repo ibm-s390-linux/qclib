@@ -1005,17 +1005,9 @@ int qc_set_attr_int(struct qc_handle *hdl, enum qc_attr_id id, int val, char src
 	if ((ptr = (int *)qc_set_attr(hdl, id, integer, src, &prev_set)) == NULL)
 		return -1;
 	if (qc_consistency_check_requested && prev_set && *ptr != val) {
-#ifdef CONFIG_TEXTUAL_HYPFS
-		int *layer_type = qc_get_attr_value_int(hdl, qc_layer_type_num);
-		// Affects ids qc_num_cp_total and qc_num_ifl_total only
-		if (orig_src != ATTR_SRC_HYPFS || *layer_type != QC_LAYER_TYPE_LPAR) {
-#endif
-			qc_debug(hdl, "Error: Consistency at layer %d: Attr %s had value %d from %c, try to set to %d from %c\n",
-				 hdl->layer_no, qc_attr_id_to_char(hdl, id), *ptr, orig_src, val, src);
-				return -2;
-#ifdef CONFIG_TEXTUAL_HYPFS
-		}
-#endif
+		qc_debug(hdl, "Error: Consistency at layer %d: Attr %s had value %d from %c, try to set to %d from %c\n",
+			 hdl->layer_no, qc_attr_id_to_char(hdl, id), *ptr, orig_src, val, src);
+			return -2;
 	}
 	*ptr = val;
 

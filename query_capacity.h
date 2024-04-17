@@ -11,7 +11,6 @@
 /* Build Customization */
 //#define CONFIG_DUMP_READING		// Allow to read in dumps
 //#define CONFIG_V1_COMPATIBILITY	// Support functionality deprecated in v1.x
-//#define CONFIG_TEXTUAL_HYPFS		// Use data from textual hypfs if available
 
 /** \enum qc_attr_id
  * Defines the attributes retrievable by the API. Attributes can
@@ -23,11 +22,9 @@
  * value is gained:
  *   - **S**: Provided by \c /proc/sysinfo, which is present in all Linux on z flavors.
  *   - **F**: Provided by firmware as made available through the \c sysfs filesystem.
- *   - **H**: Provided by hypfs, which is (preferably) available through \c debugfs at
- *            \c /sys/kernel/debug/s390_hypfs, or \c s390_hypfs (typically mounted at
- *            \c /sys/hypervisor/s390).
+ *   - **H**: Provided by hypfs, which is available through \c debugfs at
+ *            \c /sys/kernel/debug/s390_hypfs .
  *            Proper file access privileges required.
- *   - **h**: See H, but provided by \c debugfs exclusively.
  *   - **V**: Provided by the STHYI instruction.
  *            - <i>z/VM Linux guests</i>: Requires z/VM 6.3 with APAR VM65419 or higher.
  *              UM34746 for z/VM 6.3.0 APAR VM65716 is required for LPAR groups support
@@ -101,17 +98,17 @@
  * #qc_num_core_configured             | int  |<CODE>S&nbsp;&nbsp;</CODE>| General purpose cores only without IFLs and zIIPs
  * #qc_num_core_standby                | int  |<CODE>S&nbsp;&nbsp;</CODE>| General purpose cores which are in the (very brief) process of being added to the configuration
  * #qc_num_core_reserved               | int  |<CODE>S&nbsp;&nbsp;</CODE>| IFLs, zIIPs, spares, excluding IFPs (Internal Firmware Processors)
- * #qc_num_core_dedicated              | int  |<CODE>&nbsp;hV</CODE>| Sum of #qc_num_cp_dedicated and #qc_num_ifl_dedicated<br><b>Note</b>: \b [4]
- * #qc_num_core_shared                 | int  |<CODE>&nbsp;hV</CODE>| Sum of #qc_num_cp_shared and #qc_num_ifl_shared<br><b>Note</b>: \b [4]
+ * #qc_num_core_dedicated              | int  |<CODE>&nbsp;&nbsp;V</CODE>| Sum of #qc_num_cp_dedicated and #qc_num_ifl_dedicated<br><b>Note</b>: \b [4]
+ * #qc_num_core_shared                 | int  |<CODE>&nbsp;&nbsp;V</CODE>| Sum of #qc_num_cp_shared and #qc_num_ifl_shared<br><b>Note</b>: \b [4]
  * #qc_num_cp_total                    | int  |<CODE>&nbsp;HV</CODE>| Equals the sum of #qc_num_cp_dedicated and #qc_num_cp_shared<br>Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_num_cp_dedicated                | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_num_cp_shared                   | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_num_cp_dedicated                | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_num_cp_shared                   | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
  * #qc_num_ifl_total                   | int  |<CODE>&nbsp;HV</CODE>| Equals the sum of #qc_num_ifl_dedicated and #qc_num_ifl_shared<br>Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_num_ifl_dedicated               | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_num_ifl_shared                  | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_num_ifl_dedicated               | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_num_ifl_shared                  | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
  * #qc_num_ziip_total                  | int  |<CODE>&nbsp;HV</CODE>| Equals the sum of #qc_num_ziip_dedicated and #qc_num_ziip_shared<br>Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_num_ziip_dedicated              | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_num_ziip_shared                 | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_num_ziip_dedicated              | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_num_ziip_shared                 | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
  * #qc_num_cp_threads                  | int  |<CODE>S&nbsp;&nbsp;</CODE>| Number of threads/CPUs per CP core that the CEC is capable of<br><b>Note</b>: Requires Linux kernel 4.4 or higher
  * #qc_num_ifl_threads                 | int  |<CODE>S&nbsp;&nbsp;</CODE>| Number of threads/CPUs per IFL core that the CEC is capable of<br><b>Note</b>: Requires Linux kernel 4.4 or higher
  * #qc_num_ziip_threads                | int  |<CODE>S&nbsp;&nbsp;</CODE>| Number of threads/CPUs per zIIP core that the CEC is capable of<br><b>Note</b>: Requires Linux kernel 4.4 or higher
@@ -126,10 +123,10 @@
  * #qc_layer_category_num              | int  |     | Hardcoded to \c #QC_LAYER_CAT_POOL
  * #qc_layer_type                      |string|     | Hardcoded to \c "LPAR-Group"
  * #qc_layer_category                  |string|     | Hardcoded to \c "POOL"
- * #qc_layer_name                      |string|<CODE>&nbsp;hV</CODE>| Name of LPAR group
- * #qc_cp_absolute_capping             | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_ifl_absolute_capping            | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_ziip_absolute_capping           | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
+ * #qc_layer_name                      |string|<CODE>&nbsp;&nbsp;V</CODE>| Name of LPAR group
+ * #qc_cp_absolute_capping             | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_ifl_absolute_capping            | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_ziip_absolute_capping           | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
  *
  * Attributes for LPARs                | Type | Src | Comment
  * ------------------------------------|------|-----|-------------------------------------
@@ -153,23 +150,23 @@
  * #qc_num_core_dedicated              | int  |<CODE>S&nbsp;&nbsp;</CODE>| Dedicated operational cores only<br><b>Note</b>: \b [5], hence sum of #qc_num_cp_dedicated, #qc_num_ifl_dedicated and #qc_num_ziip_dedicated can be larger
  * #qc_num_core_shared                 | int  |<CODE>S&nbsp;&nbsp;</CODE>| Shared operational cores only<br><b>Note</b>: \b [5], hence sum of #qc_num_cp_shared, #qc_num_ifl_shared and #qc_num_ziip_dedicated can be larger
  * #qc_num_cp_total                    | int  |<CODE>&nbsp;HV</CODE>| Sum of #qc_num_cp_dedicated and #qc_num_cp_shared. Considers configured CPs only.<br>Reported in unit of cores
- * #qc_num_cp_dedicated                | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_num_cp_shared                   | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
+ * #qc_num_cp_dedicated                | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_num_cp_shared                   | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
  * #qc_num_ifl_total                   | int  |<CODE>&nbsp;HV</CODE>| Sum of #qc_num_ifl_dedicated and #qc_num_ifl_shared. Considers configured IFLs only.<br>Reported in unit of cores
- * #qc_num_ifl_dedicated               | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_num_ifl_shared                  | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
+ * #qc_num_ifl_dedicated               | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_num_ifl_shared                  | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
  * #qc_num_ziip_total                  | int  |<CODE>&nbsp;HV</CODE>| Sum of #qc_num_ziip_dedicated and #qc_num_ziip_shared. Considers configured zIIPs only.<br>Reported in unit of cores
- * #qc_num_ziip_dedicated              | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_num_ziip_shared                 | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
+ * #qc_num_ziip_dedicated              | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_num_ziip_shared                 | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
  * #qc_num_cp_threads                  | int  |<CODE>S&nbsp;&nbsp;</CODE>| Number of threads/CPUs per CP core configured for this LPAR<br><b>Note</b>: Requires Linux kernel 4.3 or higher
  * #qc_num_ifl_threads                 | int  |<CODE>S&nbsp;&nbsp;</CODE>| Number of threads/CPUs per IFL core configured for this LPAR<br><b>Note</b>: Requires Linux kernel 4.3 or higher
  * #qc_num_ziip_threads                | int  |<CODE>S&nbsp;&nbsp;</CODE>| Number of threads/CPUs per zIIP core configured for this LPAR<br><b>Note</b>: Requires Linux kernel 4.3 or higher
- * #qc_cp_absolute_capping             | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_cp_weight_capping               | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_ifl_absolute_capping            | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_ifl_weight_capping              | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
- * #qc_ziip_absolute_capping           | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores
- * #qc_ziip_weight_capping             | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_cp_absolute_capping             | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_cp_weight_capping               | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_ifl_absolute_capping            | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_ifl_weight_capping              | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
+ * #qc_ziip_absolute_capping           | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores
+ * #qc_ziip_weight_capping             | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores<br><b>Note</b>: \b [4]
  *
  *
  * Attributes for z/VM hypervisors     | Type | Src | Comment
@@ -340,8 +337,8 @@
  * #qc_num_core_dedicated              | int  |<CODE>SHV</CODE>| Sum of #qc_num_cp_dedicated and #qc_num_ifl_dedicated
  * #qc_num_core_shared                 | int  |<CODE>SHV</CODE>| Sum of #qc_num_cp_shared and #qc_num_ifl_shared
  * #qc_num_cp_total                    | int  |<CODE>&nbsp;HV</CODE>| Sum of #qc_num_cp_dedicated and #qc_num_cp_shared<br>Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
- * #qc_num_cp_dedicated                | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
- * #qc_num_cp_shared                   | int  |<CODE>&nbsp;hV</CODE>| Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
+ * #qc_num_cp_dedicated                | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
+ * #qc_num_cp_shared                   | int  |<CODE>&nbsp;&nbsp;V</CODE>| Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
  * #qc_num_ifl_total                   | int  |<CODE>SHV</CODE>| Sum of #qc_num_ifl_dedicated and #qc_num_ifl_shared<br>Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
  * #qc_num_ifl_dedicated               | int  |<CODE>ShV</CODE>| Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
  * #qc_num_ifl_shared                  | int  |<CODE>ShV</CODE>| Reported in unit of cores unless run as a guest of another hypervisor other than LPAR
