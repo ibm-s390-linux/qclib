@@ -19,7 +19,7 @@ else
 fi
 
 echo "Executing $qcbin...";
-QC_DEBUG=2 $qcbin --json >/tmp/ref_result.txt;
+$qcbin -dd --json >/tmp/ref_result.txt 2>/tmp/ref_trace.txt;
 
 if [ $? -ne 0 ]; then
 	echo "$qcbin failed - good thing we're creating a dump";
@@ -34,9 +34,9 @@ if [ "$dump" == "" ]; then
 	exit 3;
 fi
 mv ref_result.txt $dump;
+mv ref_trace.txt $dump;
 lscpu -e			> $dump/lscpu.output;
 hostname			> $dump/hostname.output;
-cp `ls -rtd qclib-?????? | tail -1` $dump;
 tgt=${dump%.*}.tgz;
 if [ -e /dev/vmcp ]; then
 	vmcp QUERY MULTITHREAD	> $dump/QUERY_MULTITHREAD.output;
