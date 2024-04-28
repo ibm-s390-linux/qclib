@@ -87,15 +87,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
-* __v2.4.99 (tbd)__
+* __v2.5.0 (2024-04-28)__
 
     _Changes_:
     - Remove support for textual hypfs, as previously indicated with v1.4.0
     - `zname`, `zhypinfo`: Add command line switch `-d`
     - Removed now unused compile option `CONFIG_DEBUG_TIMESTAMPS`
-
-    _Bug fixes_:
-
 
 * __v2.4.1 (2023-12-17)__
 

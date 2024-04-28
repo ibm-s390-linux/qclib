@@ -4,7 +4,7 @@
 #     major : Backwards compatible changes to the API
 #     minor : Additions leaving the API unmodified
 #     bugfix: Bugfixes only
-VERSION    = 2.4.99
+VERSION    = 2.5.0
 VERM       = $(shell echo $(VERSION) | cut -d '.' -f 1)
 CFLAGS    ?= -g -Wall -O2
 LDFLAGS   ?=
