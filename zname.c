@@ -117,7 +117,7 @@ int main(int argc, char **argv) {
 	if (dbg > 1)
 		setenv("QC_DEBUG", "2", 1);
 	if (json && opts) {
-		fprintf(stderr, "Error: Specifiy either one of the options to print info, or --json\n");
+		fprintf(stderr, "Error: Specify either one of the options to print info, or --json\n");
 			rc = 2;
 		goto out;
 	}
