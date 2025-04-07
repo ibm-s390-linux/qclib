@@ -90,6 +90,8 @@ Release History
 * __v2.5.99 (tbd)__
 
     _Changes_:
+    - `sysinfo`: Use consistent logic when reading from dump and in live
+      system, increase initial buffer size to accommodate bigger systems
 
     _Bug fixes_:
 

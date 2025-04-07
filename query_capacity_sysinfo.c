@@ -54,7 +54,6 @@ static void qc_sysinfo_dump(struct qc_handle *hdl, char *sysinfo) {
 static int qc_sysinfo_open(struct qc_handle *hdl, char **sysinfo) {
 	char *fname = NULL;
 	ssize_t lrc = 1, sysinfo_sz;
-	struct stat buf;
 	int fd;
 
 	qc_debug(hdl, "Retrieve sysinfo\n");
@@ -66,17 +65,10 @@ static int qc_sysinfo_open(struct qc_handle *hdl, char **sysinfo) {
 			qc_debug(hdl, "Error: Mem alloc failed, cannot open dump\n");
 			goto out_early;
 		}
-		if (stat(fname, &buf)) {
-			qc_debug(hdl, "Error: Failed to stat file '%s'\n", fname);
-			goto out_early;
-		}
-		sysinfo_sz = buf.st_size + 1;
-	} else {
+	} else
 		qc_debug(hdl, "Read sysinfo from /proc/sysinfo\n");
-		sysinfo_sz = 4096;
-	}
 
-	for (lrc = sysinfo_sz; lrc >= sysinfo_sz; sysinfo_sz *= 2, lrc *= 2) {
+	for (sysinfo_sz = 8192, lrc = sysinfo_sz; 2 * lrc >= sysinfo_sz; sysinfo_sz *= 2) {
 		fd = open(fname ? fname : "/proc/sysinfo", O_RDONLY);
 		if (!fd) {
 			qc_debug(hdl, "Error: Failed to open file '%s': %s\n",
@@ -99,9 +91,9 @@ static int qc_sysinfo_open(struct qc_handle *hdl, char **sysinfo) {
 			*sysinfo = NULL;
 			goto out;
 		}
-		(*sysinfo)[lrc] = '\0';
 		close(fd);
 	}
+	(*sysinfo)[lrc] = '\0';
 	goto out_early;
 
 out:
