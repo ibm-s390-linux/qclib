@@ -87,14 +87,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
-* __v2.5.99 (tbd)__
+* __v2.5.1 (2025-05-10)__
 
     _Changes_:
     - Recognize IBM z17 and LinuxONE Emperor 5
     - `sysinfo`: Use consistent logic when reading from dump and in live
       system, increase initial buffer size to accommodate bigger systems
-
-    _Bug fixes_:
 
 * __v2.5.0 (2024-04-28)__
 
