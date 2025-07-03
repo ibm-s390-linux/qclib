@@ -87,6 +87,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
+* __v2.5.99 (tbd)__
+
+    _Changes_:
+
+    _Bug fixes_:
+    - Fix duplicate LPAR group entries
+
 * __v2.5.1 (2025-05-10)__
 
     _Changes_:

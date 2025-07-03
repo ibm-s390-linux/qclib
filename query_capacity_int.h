@@ -68,6 +68,8 @@ int qc_is_nonempty_ebcdic(__u64 *str);
 int qc_hdl_new(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no, int layer_type);
 // Insert new layer 'inserted_hdl' of type 'type' before 'hdl'. Won't support inserting a new root
 int qc_hdl_insert(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int type);
+// Insert a new layer for an LPAR group if it doesn't exist yet
+int qc_hdl_insert_lpar_group(struct qc_handle *hdl, struct qc_handle **inserted_hdl);
 // Insert new layer 'appended_hdl' of type 'type' after 'hdl'
 int qc_hdl_append(struct qc_handle *hdl, struct qc_handle **appended_hdl, int type);
 // Remove the layer pointed to by the handle and all layers on top

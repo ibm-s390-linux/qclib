@@ -742,6 +742,12 @@ struct qc_handle *qc_hdl_get_lpar(struct qc_handle *hdl) {
 	return hdl;
 }
 
+static struct qc_handle *qc_hdl_get_lpar_group(struct qc_handle *hdl) {
+	for (hdl = hdl->root; hdl != NULL && *(int *)(hdl->layer) != QC_LAYER_TYPE_LPAR_GROUP; hdl = hdl->next);
+
+	return hdl;
+}
+
 // 'hdl' is for error reporting, as 'tgthdl' might not be part of the pointer lists yet
 int qc_hdl_new(struct qc_handle *hdl, struct qc_handle **tgthdl, int layer_no,
 		  int layer_type_num) {
@@ -898,6 +904,20 @@ int qc_hdl_insert(struct qc_handle *hdl, struct qc_handle **inserted_hdl, int ty
 		hdl->layer_no++;
 
 	return 0;
+}
+
+/* LPAR groups are reflected in both, STHYI and binary hypfs, so we have to skip
+ * creation in case either one has already added it */
+int qc_hdl_insert_lpar_group(struct qc_handle *hdl, struct qc_handle **inserted_hdl) {
+	int rc = 0;
+
+	*inserted_hdl = qc_hdl_get_lpar_group(hdl);
+	if (*inserted_hdl == NULL) {
+		qc_debug(hdl, "Insert LPAR group layer\n");
+		rc = qc_hdl_insert(hdl, inserted_hdl, QC_LAYER_TYPE_LPAR_GROUP);
+	}
+
+	return rc;
 }
 
 void qc_hdl_prune(struct qc_handle *hdl) {

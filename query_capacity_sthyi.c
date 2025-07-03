@@ -231,11 +231,11 @@ static int qc_parse_sthyi_partition(struct qc_handle *lpar, struct inf0par *part
 
 	if (partition->infpval1 & infplgvl && (rc = qc_is_nonempty_ebcdic((__u64*)partition->infplgnm)) > 0) {
 		/* LPAR group is only defined in case group name is not empty */
-		qc_debug(lpar, "Insert LPAR group layer\n");
-		if (qc_hdl_insert(lpar, &group, QC_LAYER_TYPE_LPAR_GROUP)) {
+		if (qc_hdl_insert_lpar_group(lpar, &group)) {
 			qc_debug(lpar, "Error: Failed to insert LPAR group layer\n");
 			goto out_err;
 		}
+		qc_debug(lpar, "Add LPAR group information\n");
 		rc = qc_set_attr_ebcdic_string(group, qc_layer_name, partition->infplgnm, sizeof(partition->infplgnm), ATTR_SRC_STHYI);
 		if (htobe32(partition->infplgcp))
 			rc |= qc_set_attr_int(group, qc_cp_absolute_capping, htobe32(partition->infplgcp), ATTR_SRC_STHYI);

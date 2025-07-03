@@ -309,11 +309,11 @@ static int qc_fill_in_hypfs_lpar_values_bin(struct qc_handle *hdl, __u8 *data) {
 	}
 	if (qc_is_nonempty_ebcdic((__u64*)tgt_lpar->grp_name)) {
 		/* LPAR group is only defined in case group name is not binary zero */
-		qc_debug(hdl, "Insert LPAR group layer\n");
-		if (qc_hdl_insert(hdl, &group, QC_LAYER_TYPE_LPAR_GROUP)) {
+		if (qc_hdl_insert_lpar_group(hdl, &group)) {
 			qc_debug(hdl, "Error: Failed to insert LPAR group layer\n");
 			goto out_err;
 		}
+		qc_debug(group, "Add LPAR group information\n");
 		rc = qc_set_attr_ebcdic_string(group, qc_layer_name, (unsigned char *)tgt_lpar->grp_name, sizeof(tgt_lpar->grp_name), ATTR_SRC_STHYI);
 		if (cp_cap)
 			rc |= qc_set_attr_int(group, qc_cp_absolute_capping, cp_cap * 0x10000 / 100, ATTR_SRC_STHYI);
