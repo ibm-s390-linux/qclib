@@ -1,0 +1,21 @@
+[workspace.package]
+edition = "2021"
+license-file = "LICENSE"
+
+[package]
+name = "qclib"
+version = "2.5.1"
+edition.workspace = true
+license-file.workspace = true
+description = "Rust bindings for qclib (Query Capacity Library)"
+
+[dependencies]
+serde_json = "1.0"
+
+[dependencies.sys]
+package = "qclib-sys"
+path = "qclib-sys"
+version = "2"
+
+[dev-dependencies]
+clap = { version = "4.5", features = ["derive"] }
