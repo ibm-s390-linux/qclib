@@ -20,3 +20,6 @@ json = ["dep:serde_json"]
 package = "qclib-sys"
 path = "qclib-sys"
 version = "2"
+
+[dev-dependencies]
+clap = { version = "4.5", features = ["derive"] }
