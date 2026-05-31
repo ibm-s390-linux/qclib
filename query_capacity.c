@@ -239,17 +239,22 @@ void qc_debug_indent_dec(void) {
 
 void qc_mark_dump_incomplete(struct qc_handle *hdl, char *missing_component) {
 	int rc;
-	char *cmd;
+	FILE *fp = NULL;
+	char *fname = NULL;
 
-	if (asprintf(&cmd, "/bin/echo %s >> %s/%s", missing_component, qc_dbg_dump_dir,
-								QC_DUMP_INCOMPLETE) == -1) {
-		qc_debug(hdl, "Error: Failed to alloc mem to indicate dump as incomplete\n");
+	rc = asprintf(&fname, "%s/%s", qc_dbg_dump_dir, QC_DUMP_INCOMPLETE);
+	if (rc) {
+		qc_debug(hdl, "Error: Failed to alloc memory in qc_mark_dump_incomplete()\n");
 		return;
 	}
-	if ((rc = system(cmd)) != 0)
-		qc_debug(hdl, "Error: Failed to exec command to indicate dump as incomplete, "
-										"rc=%d\n", rc);
-	free(cmd);
+	fp = fopen(fname, "w");
+	if (fp) {
+		fprintf(fp, "Failed to alloc memory in qc_mark_dump_incomplete()\n");
+		fclose(fp);
+	} else
+		qc_debug(hdl, "Error: Failed to open %s/%s in qc_mark_dump_incomplete()\n",
+			 qc_dbg_dump_dir, QC_DUMP_INCOMPLETE);
+	free(fname);
 }
 
 /* Convert EBCDIC input to ASCII in place, removing trailing whitespace */

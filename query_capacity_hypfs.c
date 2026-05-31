@@ -121,7 +121,8 @@ static char *qc_get_path(struct qc_handle *hdl, const char *dbgfs, const char *f
 }
 
 static void qc_dump_hypfs_bin(struct qc_handle *hdl, const char *diag, __u8 *data, ssize_t len) {
-	char *fname = NULL, *cmd;
+	FILE *fp = NULL;
+	char *fname = NULL;
 	int fd, rc, success = 0;
 
 	/* We re-create the same directory/file structure that we read from */
@@ -160,20 +161,21 @@ static void qc_dump_hypfs_bin(struct qc_handle *hdl, const char *diag, __u8 *dat
 	if (strcmp(diag, QC_HYPFS_ZVM) == 0) {
 		// if we're on z/VM, we need to make sure that the LPAR file exists, as logic
 		// uses it as a flag to indicate presence of the binary hypfs API
-		if (asprintf(&cmd, "/bin/touch %s/%s > /dev/null 2>&1", qc_dbg_dump_dir,
-								QC_HYPFS_LPAR) == -1) {
+		free(fname);
+		if (asprintf(&fname, "%s/%s", qc_dbg_dump_dir, QC_HYPFS_LPAR) == -1) {
 			qc_debug(hdl, "Error: Mem alloc failure, could not touch '%s'. "
-				"Dump will not work without, fix by adding it manually later on.\n",
-				QC_HYPFS_LPAR);
+				 "Dump will not work without, fix by adding it manually later on.\n",
+				 QC_HYPFS_LPAR);
 			qc_mark_dump_incomplete(hdl, QC_HYPFS_LPAR);
 			goto out;
 		}
-		if ((rc = system(cmd)) != 0) {
-			qc_debug(hdl, "Error: Command '%s' failed, rc=%d. Dump will not work "
-				"without, fix by adding it manually later on.\n", cmd, rc);
+		fp = fopen(fname, "a");
+		if (!fp) {
+			qc_debug(hdl, "Error: Failed to touch file %s. Dump will not work "
+				"without, fix by adding it manually later on.\n", fname);
 			qc_mark_dump_incomplete(hdl, QC_HYPFS_LPAR);
 		}
-		free(cmd);
+		fclose(fp);
 	}
 
 out:
