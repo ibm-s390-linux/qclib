@@ -90,6 +90,7 @@ Release History
 * __v2.5.99 (tbd)__
 
     _Changes_:
+    - Recognize IBM z17 single frame and LinuxONE Rockhopper models
 
     _Bug fixes_:
     - Fix duplicate LPAR group entries
