@@ -174,8 +174,8 @@ static void qc_dump_hypfs_bin(struct qc_handle *hdl, const char *diag, __u8 *dat
 			qc_debug(hdl, "Error: Failed to touch file %s. Dump will not work "
 				"without, fix by adding it manually later on.\n", fname);
 			qc_mark_dump_incomplete(hdl, QC_HYPFS_LPAR);
-		}
-		fclose(fp);
+		} else
+			fclose(fp);
 	}
 
 out:
