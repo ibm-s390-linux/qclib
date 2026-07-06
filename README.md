@@ -87,7 +87,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 Release History
 ---------------
 
-* __v2.5.99 (tbd)__
+* __v2.5.2 (2026-07-06)__
 
     _Changes_:
     - Recognize IBM z17 single frame and LinuxONE Rockhopper models

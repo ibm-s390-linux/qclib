@@ -5,7 +5,7 @@
 #ifndef QUERY_CAPACITY
 #define QUERY_CAPACITY
 
-#define QC_VERSION	"2.5.1"
+#define QC_VERSION	"2.5.2"
 
 
 /* Build Customization */
